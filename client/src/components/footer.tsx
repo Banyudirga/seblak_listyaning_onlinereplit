@@ -75,6 +75,11 @@ export default function Footer() {
                   FAQ
                 </a>
               </li>
+              <li>
+                <a href="/admin" className="hover:text-indonesian-red transition-colors text-sm">
+                  Admin Dashboard
+                </a>
+              </li>
             </ul>
           </div>
         </div>
