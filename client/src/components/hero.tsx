@@ -28,16 +28,13 @@ export default function Hero() {
                 <Utensils className="h-4 w-4 mr-2" />
                 Lihat Menu
               </Button>
-              <Button 
-                variant="outline" 
-                className="border-2 border-white text-white hover:bg-white hover:text-indonesian-red"
-                asChild
+              <a
+                href="tel:+6281234567890"
+                className="inline-flex items-center justify-center rounded-md border-2 border-white text-white px-4 py-2 font-medium hover:bg-white hover:text-indonesian-red transition-colors"
               >
-                <a href="tel:+6281234567890" className="flex items-center">
-                  <Phone className="h-4 w-4 mr-2" />
-                  Hubungi Kami
-                </a>
-              </Button>
+                <Phone className="h-4 w-4 mr-2" />
+                Hubungi Kami
+              </a>
             </div>
           </div>
           <div className="relative">

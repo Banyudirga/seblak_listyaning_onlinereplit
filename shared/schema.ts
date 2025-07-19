@@ -19,7 +19,7 @@ export const orders = pgTable("orders", {
   customerName: text("customer_name").notNull(),
   customerPhone: text("customer_phone").notNull(),
   customerAddress: text("customer_address").notNull(),
-  postalCode: text("postal_code").notNull(),
+  serviceType: text("service_type"), // "makan ditempat", "diambil", "diantar"
   notes: text("notes"),
   items: json("items").notNull(), // Array of {id, name, price, quantity}
   totalAmount: integer("total_amount").notNull(),

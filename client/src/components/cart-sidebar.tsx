@@ -27,10 +27,10 @@ export default function CartSidebar() {
       )}
       
       {/* Sidebar */}
-      <div className={`fixed right-0 top-0 h-full w-80 bg-white shadow-2xl transform transition-transform z-50 ${
+      <div className={`fixed right-0 top-0 h-full w-80 bg-white shadow-2xl transform transition-transform z-50 flex flex-col ${
         isOpen ? 'translate-x-0' : 'translate-x-full'
       }`}>
-        <div className="p-6 border-b border-gray-200">
+        <div className="p-6 border-b border-gray-200 flex-shrink-0">
           <div className="flex items-center justify-between">
             <h3 className="text-xl font-bold text-dark-grey">Keranjang Belanja</h3>
             <Button
@@ -44,7 +44,7 @@ export default function CartSidebar() {
           </div>
         </div>
         
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto p-6 min-h-0">
           {items.length === 0 ? (
             <div className="text-center text-gray-500 py-8">
               <ShoppingCart className="h-12 w-12 mx-auto mb-4 text-gray-300" />
@@ -91,7 +91,7 @@ export default function CartSidebar() {
         </div>
         
         {items.length > 0 && (
-          <div className="p-6 border-t border-gray-200 bg-gray-50">
+          <div className="p-6 border-t border-gray-200 bg-gray-50 flex-shrink-0">
             <div className="flex justify-between items-center mb-4">
               <span className="text-lg font-medium text-dark-grey">Total:</span>
               <span className="text-2xl font-bold text-indonesian-red">

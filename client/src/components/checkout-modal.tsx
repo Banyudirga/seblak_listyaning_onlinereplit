@@ -7,6 +7,7 @@ import { useCart } from "@/hooks/use-cart";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { X, Send } from "lucide-react";
 import { formatRupiah } from "@/lib/format";
@@ -25,7 +26,7 @@ const checkoutSchema = z.object({
   customerName: z.string().min(1, "Nama lengkap wajib diisi"),
   customerPhone: z.string().min(10, "Nomor telepon tidak valid"),
   customerAddress: z.string().min(10, "Alamat lengkap wajib diisi"),
-  postalCode: z.string().min(5, "Kode pos tidak valid"),
+  serviceType: z.string().optional(),
   notes: z.string().optional(),
 });
 
@@ -43,7 +44,7 @@ export default function CheckoutModal() {
       customerName: "",
       customerPhone: "",
       customerAddress: "",
-      postalCode: "",
+      serviceType: "",
       notes: "",
     },
   });
@@ -161,13 +162,22 @@ export default function CheckoutModal() {
 
               <FormField
                 control={form.control}
-                name="postalCode"
+                name="serviceType"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Kode Pos</FormLabel>
-                    <FormControl>
-                      <Input placeholder="40123" {...field} />
-                    </FormControl>
+                    <FormLabel>Cara Pelayanan (Opsional)</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Pilih cara pelayanan" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="diantar">Diantar</SelectItem>
+                        <SelectItem value="diambil">Diambil</SelectItem>
+                        <SelectItem value="makan ditempat">Makan ditempat</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
