@@ -26,7 +26,7 @@ const checkoutSchema = z.object({
   customerName: z.string().min(1, "Nama lengkap wajib diisi"),
   customerPhone: z.string().min(10, "Nomor telepon tidak valid"),
   customerAddress: z.string().min(10, "Alamat lengkap wajib diisi"),
-  serviceType: z.string().optional(),
+  serviceType: z.string().min(1, "Cara pelayanan wajib dipilih"),
   notes: z.string().optional(),
 });
 
@@ -63,7 +63,10 @@ export default function CheckoutModal() {
       });
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      // Store order data in sessionStorage
+      sessionStorage.setItem('currentOrder', JSON.stringify(data));
+      
       toast({
         title: "Pesanan Berhasil!",
         description: "Terima kasih! Pesanan Anda sedang diproses.",
@@ -71,6 +74,9 @@ export default function CheckoutModal() {
       clearCart();
       setIsOpen(false);
       form.reset();
+      
+      // Navigate to receipt page
+      window.location.href = '/receipt';
     },
     onError: () => {
       toast({
@@ -165,7 +171,7 @@ export default function CheckoutModal() {
                 name="serviceType"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Cara Pelayanan (Opsional)</FormLabel>
+                    <FormLabel>Cara Pelayanan</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
