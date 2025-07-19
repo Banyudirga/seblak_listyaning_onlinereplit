@@ -27,6 +27,7 @@ const checkoutSchema = z.object({
   customerPhone: z.string().min(10, "Nomor telepon tidak valid"),
   customerAddress: z.string().min(10, "Alamat lengkap wajib diisi"),
   serviceType: z.string().min(1, "Cara pelayanan wajib dipilih"),
+  paymentMethod: z.string().min(1, "Metode pembayaran wajib dipilih"),
   notes: z.string().optional(),
 });
 
@@ -45,6 +46,7 @@ export default function CheckoutModal() {
       customerPhone: "",
       customerAddress: "",
       serviceType: "",
+      paymentMethod: "",
       notes: "",
     },
   });
@@ -182,6 +184,31 @@ export default function CheckoutModal() {
                         <SelectItem value="diantar">Diantar</SelectItem>
                         <SelectItem value="diambil">Diambil</SelectItem>
                         <SelectItem value="makan ditempat">Makan ditempat</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="paymentMethod"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Metode Pembayaran</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Pilih metode pembayaran" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="cash">Tunai (Cash)</SelectItem>
+                        <SelectItem value="bank_transfer">Transfer Bank</SelectItem>
+                        <SelectItem value="gopay">GoPay</SelectItem>
+                        <SelectItem value="ovo">OVO</SelectItem>
+                        <SelectItem value="dana">DANA</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />

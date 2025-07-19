@@ -20,6 +20,7 @@ export const orders = pgTable("orders", {
   customerPhone: text("customer_phone").notNull(),
   customerAddress: text("customer_address").notNull(),
   serviceType: text("service_type").notNull(), // "makan ditempat", "diambil", "diantar"
+  paymentMethod: text("payment_method").notNull(), // "cash", "bank_transfer", "gopay", "ovo", "dana"
   notes: text("notes"),
   items: json("items").notNull(), // Array of {id, name, price, quantity}
   totalAmount: integer("total_amount").notNull(),

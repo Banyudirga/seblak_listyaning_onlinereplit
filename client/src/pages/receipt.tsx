@@ -47,6 +47,9 @@ Nama: ${order.customerName}
 Telepon: ${order.customerPhone}
 Alamat: ${order.customerAddress}
 Cara Pelayanan: ${order.serviceType}
+Metode Pembayaran: ${order.paymentMethod === 'cash' ? 'Tunai' :
+                     order.paymentMethod === 'bank_transfer' ? 'Transfer Bank' :
+                     order.paymentMethod?.toUpperCase()}
 ${order.notes ? `Catatan: ${order.notes}` : ''}
 
 Terima kasih telah memesan di Seblak Listyaning! 🌶️`;
@@ -118,6 +121,14 @@ Terima kasih telah memesan di Seblak Listyaning! 🌶️`;
                 <div className="flex justify-between">
                   <span className="text-gray-600">Cara Pelayanan:</span>
                   <span className="font-medium capitalize">{order.serviceType}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Metode Pembayaran:</span>
+                  <span className="font-medium capitalize">
+                    {order.paymentMethod === 'cash' ? 'Tunai' :
+                     order.paymentMethod === 'bank_transfer' ? 'Transfer Bank' :
+                     order.paymentMethod?.toUpperCase()}
+                  </span>
                 </div>
                 {order.notes && (
                   <div className="flex justify-between">
