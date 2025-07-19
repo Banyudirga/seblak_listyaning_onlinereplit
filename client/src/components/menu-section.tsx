@@ -15,6 +15,7 @@ const categoryIcons = {
   "Keju": ChefHat,
   "Dingin": Snowflake,
   "Cemilan": ChefHat,
+  "Gurih": ChefHat,
 };
 
 const categoryColors = {
@@ -24,6 +25,7 @@ const categoryColors = {
   "Keju": "bg-orange-500",
   "Dingin": "bg-green-500",
   "Cemilan": "bg-orange-500",
+  "Gurih": "bg-yellow-500",
 };
 
 export default function MenuSection() {
@@ -37,6 +39,7 @@ export default function MenuSection() {
   const categories = [
     { id: "all", name: "Semua Menu" },
     { id: "seblak", name: "Seblak" },
+    { id: "makanan", name: "Makanan" },
     { id: "minuman", name: "Minuman" },
     { id: "cemilan", name: "Cemilan" },
   ];

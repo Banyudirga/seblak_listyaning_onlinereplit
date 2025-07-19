@@ -11,8 +11,9 @@ export default function CartSidebar() {
   const totalPrice = getTotalPrice();
 
   const handleCheckout = () => {
-    setShowCheckout(true);
     closeCart();
+    // Dispatch custom event to open checkout modal
+    window.dispatchEvent(new CustomEvent('openCheckout'));
   };
 
   return (

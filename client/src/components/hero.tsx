@@ -33,7 +33,7 @@ export default function Hero() {
                 className="border-2 border-white text-white hover:bg-white hover:text-indonesian-red"
                 asChild
               >
-                <a href="tel:+6281234567890">
+                <a href="tel:+6281234567890" className="flex items-center">
                   <Phone className="h-4 w-4 mr-2" />
                   Hubungi Kami
                 </a>
@@ -45,6 +45,7 @@ export default function Hero() {
               src="https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600" 
               alt="Seblak Listyaning - Hidangan Seblak Lezat" 
               className="rounded-2xl shadow-2xl w-full h-auto"
+              loading="lazy"
             />
           </div>
         </div>

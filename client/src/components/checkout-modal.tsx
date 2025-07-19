@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -85,11 +85,11 @@ export default function CheckoutModal() {
   };
 
   // Open modal when called from parent
-  useState(() => {
+  useEffect(() => {
     const handleOpenCheckout = () => setIsOpen(true);
     window.addEventListener('openCheckout', handleOpenCheckout);
     return () => window.removeEventListener('openCheckout', handleOpenCheckout);
-  });
+  }, []);
 
   if (!isOpen) return null;
 

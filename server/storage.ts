@@ -76,6 +76,16 @@ export class MemStorage implements IStorage {
         reviewCount: 45
       },
       {
+        name: "Ayam Goreng Crispy",
+        description: "Ayam goreng crispy dengan bumbu rahasia, cocok sebagai lauk tambahan atau makanan utama",
+        price: 18000,
+        category: "makanan",
+        image: "https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
+        spicyLevel: "Gurih",
+        rating: 47,
+        reviewCount: 78
+      },
+      {
         name: "Kerupuk Mentah",
         description: "Kerupuk mentah berkualitas untuk pelengkap seblak atau cemilan dirumah",
         price: 8000,
