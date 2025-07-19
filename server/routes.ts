@@ -125,6 +125,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Inventory management routes
+  app.get("/api/admin/inventory", async (req, res) => {
+    try {
+      const menuItems = await storage.getAllMenuItems();
+      res.json(menuItems);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch inventory" });
+    }
+  });
+
+  app.patch("/api/admin/inventory/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { stockQuantity, lowStockThreshold } = req.body;
+      
+      if (typeof stockQuantity !== 'number' || typeof lowStockThreshold !== 'number') {
+        return res.status(400).json({ error: "Stock quantities must be numbers" });
+      }
+
+      if (stockQuantity < 0 || lowStockThreshold < 1) {
+        return res.status(400).json({ error: "Invalid stock values" });
+      }
+
+      const item = await storage.updateMenuItemStock(id, stockQuantity, lowStockThreshold);
+      if (!item) {
+        return res.status(404).json({ error: "Menu item not found" });
+      }
+
+      res.json(item);
+    } catch (error) {
+      console.error("Error updating stock:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.patch("/api/admin/inventory/:id/availability", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { isAvailable } = req.body;
+      
+      if (typeof isAvailable !== 'number' || (isAvailable !== 0 && isAvailable !== 1)) {
+        return res.status(400).json({ error: "isAvailable must be 0 or 1" });
+      }
+
+      const item = await storage.updateMenuItemAvailability(id, isAvailable);
+      if (!item) {
+        return res.status(404).json({ error: "Menu item not found" });
+      }
+
+      res.json(item);
+    } catch (error) {
+      console.error("Error updating availability:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

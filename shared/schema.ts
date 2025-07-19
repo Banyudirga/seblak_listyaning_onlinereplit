@@ -10,6 +10,10 @@ export const menuItems = pgTable("menu_items", {
   category: text("category").notNull(),
   image: text("image").notNull(),
   spicyLevel: text("spicy_level"),
+  stockQuantity: integer("stock_quantity").default(50), // Current stock count
+  lowStockThreshold: integer("low_stock_threshold").default(10), // Alert when stock is low
+  unit: text("unit").default("porsi"), // "porsi", "gelas", "pcs"
+  isAvailable: integer("is_available").default(1), // 1 = available, 0 = unavailable
   rating: integer("rating").default(45),
   reviewCount: integer("review_count").default(0),
 });

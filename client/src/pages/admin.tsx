@@ -6,10 +6,11 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { Clock, Phone, MapPin, CreditCard, FileText, RefreshCw } from "lucide-react";
+import { Clock, Phone, MapPin, CreditCard, FileText, RefreshCw, Package } from "lucide-react";
 import { formatRupiah } from "@/lib/format";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { Link } from "wouter";
 import type { Order } from "@shared/schema";
 
 export default function Admin() {
@@ -104,14 +105,25 @@ export default function Admin() {
               <h1 className="text-2xl font-bold">Seblak Listyaning - Admin</h1>
               <p className="text-red-100">Dashboard Pemilik Restoran</p>
             </div>
-            <Button 
-              onClick={() => refetch()}
-              variant="outline" 
-              className="text-indonesian-red border-white hover:bg-white"
-            >
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Refresh
-            </Button>
+            <div className="flex gap-3">
+              <Link href="/inventory">
+                <Button 
+                  variant="outline" 
+                  className="text-indonesian-red border-white hover:bg-white"
+                >
+                  <Package className="h-4 w-4 mr-2" />
+                  Inventory
+                </Button>
+              </Link>
+              <Button 
+                onClick={() => refetch()}
+                variant="outline" 
+                className="text-indonesian-red border-white hover:bg-white"
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Refresh
+              </Button>
+            </div>
           </div>
         </div>
       </div>
