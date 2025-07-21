@@ -2,22 +2,19 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Separator } from "@/components/ui/separator";
-import { Clock, Phone, MapPin, CreditCard, FileText, RefreshCw, Package } from "lucide-react";
-import { formatRupiah } from "@/lib/format";
+import { FileText, RefreshCw, Package } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
 import type { Order } from "@shared/schema";
+import OrderCard from "@/components/order-card";
 
 export default function Admin() {
   const { toast } = useToast();
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
 
-  const { data: orders = [], isLoading, refetch } = useQuery({
+  const { data: orders = [], isLoading, refetch } = useQuery<Order[]>({
     queryKey: ['/api/admin/orders'],
     refetchInterval: 10000, // Auto-refresh every 10 seconds
   });
@@ -41,41 +38,6 @@ export default function Admin() {
   const filteredOrders = orders.filter((order: Order) => 
     selectedStatus === "all" || order.status === selectedStatus
   );
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'confirmed': return 'bg-blue-100 text-blue-800';
-      case 'preparing': return 'bg-orange-100 text-orange-800';
-      case 'ready': return 'bg-green-100 text-green-800';
-      case 'delivered': return 'bg-gray-100 text-gray-800';
-      case 'cancelled': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'pending': return 'Menunggu';
-      case 'confirmed': return 'Dikonfirmasi';
-      case 'preparing': return 'Sedang Dimasak';
-      case 'ready': return 'Siap';
-      case 'delivered': return 'Selesai';
-      case 'cancelled': return 'Dibatalkan';
-      default: return status;
-    }
-  };
-
-  const getPaymentMethodText = (method: string) => {
-    switch (method) {
-      case 'cash': return 'Tunai';
-      case 'bank_transfer': return 'Transfer Bank';
-      case 'gopay': return 'GoPay';
-      case 'ovo': return 'OVO';
-      case 'dana': return 'DANA';
-      default: return method?.toUpperCase();
-    }
-  };
 
   const orderStats = {
     total: orders.length,
@@ -193,126 +155,14 @@ export default function Admin() {
               </CardContent>
             </Card>
           ) : (
-            filteredOrders.map((order: Order) => {
-              const items = Array.isArray(order.items) ? order.items : [];
-              return (
-                <Card key={order.id} className="shadow-sm">
-                  <CardHeader>
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <CardTitle className="text-lg">Pesanan #{order.id}</CardTitle>
-                        <div className="flex items-center text-sm text-gray-500 mt-1">
-                          <Clock className="h-4 w-4 mr-1" />
-                          {new Date(order.createdAt!).toLocaleDateString('id-ID', {
-                            weekday: 'short',
-                            day: 'numeric',
-                            month: 'short',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <Badge className={getStatusColor(order.status)}>
-                          {getStatusText(order.status)}
-                        </Badge>
-                        <div className="text-right">
-                          <div className="font-bold text-lg text-indonesian-red">
-                            {formatRupiah(order.totalAmount)}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  
-                  <CardContent>
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      {/* Customer Info */}
-                      <div>
-                        <h4 className="font-medium mb-3">Informasi Pelanggan</h4>
-                        <div className="space-y-2 text-sm">
-                          <div className="flex items-center">
-                            <span className="font-medium w-20">Nama:</span>
-                            <span>{order.customerName}</span>
-                          </div>
-                          <div className="flex items-center">
-                            <Phone className="h-4 w-4 mr-1" />
-                            <span className="font-medium w-16">Phone:</span>
-                            <a 
-                              href={`tel:${order.customerPhone}`}
-                              className="text-blue-600 hover:underline"
-                            >
-                              {order.customerPhone}
-                            </a>
-                          </div>
-                          <div className="flex items-start">
-                            <MapPin className="h-4 w-4 mr-1 mt-0.5" />
-                            <span className="font-medium w-16">Alamat:</span>
-                            <span className="flex-1">{order.customerAddress}</span>
-                          </div>
-                          <div className="flex items-center">
-                            <span className="font-medium w-20">Layanan:</span>
-                            <span className="capitalize">{order.serviceType}</span>
-                          </div>
-                          <div className="flex items-center">
-                            <CreditCard className="h-4 w-4 mr-1" />
-                            <span className="font-medium w-16">Payment:</span>
-                            <span>{getPaymentMethodText(order.paymentMethod)}</span>
-                          </div>
-                          {order.notes && (
-                            <div className="flex items-start">
-                              <span className="font-medium w-20">Catatan:</span>
-                              <span className="flex-1 italic">{order.notes}</span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Order Items */}
-                      <div>
-                        <h4 className="font-medium mb-3">Detail Pesanan</h4>
-                        <div className="space-y-2">
-                          {items.map((item: any, index: number) => (
-                            <div key={index} className="flex justify-between text-sm">
-                              <span>{item.name} ({item.quantity}x)</span>
-                              <span className="font-medium">{formatRupiah(item.price * item.quantity)}</span>
-                            </div>
-                          ))}
-                          <Separator />
-                          <div className="flex justify-between font-bold">
-                            <span>Total:</span>
-                            <span className="text-indonesian-red">{formatRupiah(order.totalAmount)}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Status Update */}
-                    <div className="mt-6 pt-4 border-t">
-                      <div className="flex items-center justify-between">
-                        <span className="font-medium">Update Status:</span>
-                        <div className="flex gap-2">
-                          {['confirmed', 'preparing', 'ready', 'delivered'].map((status) => (
-                            <Button
-                              key={status}
-                              size="sm"
-                              variant={order.status === status ? "default" : "outline"}
-                              onClick={() => updateOrderMutation.mutate({ 
-                                orderId: order.id, 
-                                status 
-                              })}
-                              disabled={updateOrderMutation.isPending}
-                            >
-                              {getStatusText(status)}
-                            </Button>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })
+            filteredOrders.map((order: Order) => (
+              <OrderCard 
+                key={order.id} 
+                order={order} 
+                onUpdateStatus={(status) => updateOrderMutation.mutate({ orderId: order.id, status })}
+                isUpdating={updateOrderMutation.isPending}
+              />
+            ))
           )}
         </div>
       </div>

@@ -2,34 +2,21 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { AlertTriangle, Package, Plus, Minus, Edit, ArrowLeft, AlertCircle } from "lucide-react";
-import { formatRupiah } from "@/lib/format";
+import { AlertTriangle, Package, ArrowLeft, AlertCircle } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import type { MenuItem } from "@shared/schema";
 import { Link } from "wouter";
-
-const updateStockSchema = z.object({
-  stockQuantity: z.number().min(0, "Stock cannot be negative"),
-  lowStockThreshold: z.number().min(1, "Threshold must be at least 1"),
-});
-
-type UpdateStockForm = z.infer<typeof updateStockSchema>;
+import InventoryCard from "@/components/inventory-card";
+import EditStockDialog, { type UpdateStockForm } from "@/components/edit-stock-dialog";
 
 export default function Inventory() {
   const { toast } = useToast();
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
 
-  const { data: menuItems = [], isLoading, refetch } = useQuery({
+  const { data: menuItems = [], isLoading, refetch } = useQuery<MenuItem[]>({
     queryKey: ['/api/admin/inventory'],
   });
 
@@ -68,34 +55,9 @@ export default function Inventory() {
     },
   });
 
-  const form = useForm<UpdateStockForm>({
-    resolver: zodResolver(updateStockSchema),
-    defaultValues: {
-      stockQuantity: 0,
-      lowStockThreshold: 10,
-    },
-  });
-
   const filteredItems = menuItems.filter((item: MenuItem) => 
     selectedCategory === "all" || item.category === selectedCategory
   );
-
-  const getStockStatus = (item: MenuItem) => {
-    if (!item.isAvailable) return { status: 'unavailable', color: 'bg-gray-100 text-gray-800' };
-    if (item.stockQuantity === 0) return { status: 'out-of-stock', color: 'bg-red-100 text-red-800' };
-    if (item.stockQuantity <= item.lowStockThreshold) return { status: 'low-stock', color: 'bg-yellow-100 text-yellow-800' };
-    return { status: 'in-stock', color: 'bg-green-100 text-green-800' };
-  };
-
-  const getStockStatusText = (status: string) => {
-    switch (status) {
-      case 'unavailable': return 'Tidak Tersedia';
-      case 'out-of-stock': return 'Habis';
-      case 'low-stock': return 'Stok Menipis';
-      case 'in-stock': return 'Tersedia';
-      default: return status;
-    }
-  };
 
   const inventoryStats = {
     total: menuItems.length,
@@ -104,18 +66,17 @@ export default function Inventory() {
     outOfStock: menuItems.filter((item: MenuItem) => item.stockQuantity === 0).length,
   };
 
-  const handleEditStock = (item: MenuItem) => {
-    setEditingItem(item);
-    form.reset({
-      stockQuantity: item.stockQuantity,
-      lowStockThreshold: item.lowStockThreshold,
-    });
-  };
-
-  const onSubmit = (data: UpdateStockForm) => {
+  const handleUpdateStock = (data: UpdateStockForm) => {
     if (editingItem) {
       updateStockMutation.mutate({ itemId: editingItem.id, data });
     }
+  };
+
+  const handleToggleAvailability = (item: MenuItem) => {
+    toggleAvailabilityMutation.mutate({ 
+      itemId: item.id, 
+      isAvailable: item.isAvailable ? 0 : 1 
+    });
   };
 
   if (isLoading) {
@@ -220,142 +181,26 @@ export default function Inventory() {
 
         {/* Inventory Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredItems.map((item: MenuItem) => {
-            const stockStatus = getStockStatus(item);
-            return (
-              <Card key={item.id} className="shadow-sm">
-                <CardHeader className="pb-3">
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <CardTitle className="text-lg line-clamp-2">{item.name}</CardTitle>
-                      <p className="text-sm text-gray-600 capitalize">{item.category}</p>
-                      <p className="text-lg font-bold text-indonesian-red mt-1">
-                        {formatRupiah(item.price)}
-                      </p>
-                    </div>
-                    <Badge className={stockStatus.color}>
-                      {getStockStatusText(stockStatus.status)}
-                    </Badge>
-                  </div>
-                </CardHeader>
-                
-                <CardContent>
-                  {item.image && (
-                    <img 
-                      src={item.image} 
-                      alt={item.name}
-                      className="w-full h-32 object-cover rounded-md mb-4"
-                    />
-                  )}
-                  
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Current Stock:</span>
-                      <span className="font-bold">{item.stockQuantity} {item.unit}</span>
-                    </div>
-                    
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Low Stock Alert:</span>
-                      <span className="text-sm">{item.lowStockThreshold} {item.unit}</span>
-                    </div>
-
-                    <div className="flex gap-2 pt-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="flex-1"
-                        onClick={() => handleEditStock(item)}
-                      >
-                        <Edit className="h-4 w-4 mr-1" />
-                        Edit Stock
-                      </Button>
-                      
-                      <Button
-                        variant={item.isAvailable ? "destructive" : "default"}
-                        size="sm"
-                        onClick={() => toggleAvailabilityMutation.mutate({ 
-                          itemId: item.id, 
-                          isAvailable: item.isAvailable ? 0 : 1 
-                        })}
-                        disabled={toggleAvailabilityMutation.isPending}
-                      >
-                        {item.isAvailable ? "Disable" : "Enable"}
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
+          {filteredItems.map((item: MenuItem) => (
+            <InventoryCard
+              key={item.id}
+              item={item}
+              onEditStock={setEditingItem}
+              onToggleAvailability={handleToggleAvailability}
+              isTogglingAvailability={toggleAvailabilityMutation.isPending}
+            />
+          ))}
         </div>
       </div>
 
       {/* Edit Stock Dialog */}
-      <Dialog open={!!editingItem} onOpenChange={() => setEditingItem(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Update Stock - {editingItem?.name}</DialogTitle>
-          </DialogHeader>
-          
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="stockQuantity"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Current Stock ({editingItem?.unit})</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        {...field}
-                        onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="lowStockThreshold"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Low Stock Alert Threshold ({editingItem?.unit})</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        {...field}
-                        onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <div className="flex gap-2 pt-4">
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={() => setEditingItem(null)}
-                  className="flex-1"
-                >
-                  Cancel
-                </Button>
-                <Button 
-                  type="submit" 
-                  disabled={updateStockMutation.isPending}
-                  className="flex-1"
-                >
-                  Update Stock
-                </Button>
-              </div>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
+      <EditStockDialog
+        item={editingItem}
+        isOpen={!!editingItem}
+        onClose={() => setEditingItem(null)}
+        onSubmit={handleUpdateStock}
+        isUpdating={updateStockMutation.isPending}
+      />
     </div>
   );
 }

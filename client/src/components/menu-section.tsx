@@ -38,6 +38,7 @@ export default function MenuSection() {
 
   const categories = [
     { id: "all", name: "Semua Menu" },
+    { id: "prasmanan", name: "Seblak Prasmanan" },
     { id: "seblak", name: "Seblak" },
     { id: "makanan", name: "Makanan" },
     { id: "minuman", name: "Minuman" },

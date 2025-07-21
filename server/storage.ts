@@ -1,4 +1,5 @@
 import { menuItems, orders, type MenuItem, type Order, type InsertOrder, type InsertMenuItem } from "@shared/schema";
+import { defaultMenuItems } from "./mock-data";
 
 export interface IStorage {
   getAllMenuItems(): Promise<MenuItem[]>;
@@ -26,107 +27,6 @@ export class MemStorage implements IStorage {
   }
 
   private initializeMenuItems() {
-    const defaultMenuItems: Omit<MenuItem, 'id'>[] = [
-      {
-        name: "Seblak Kerupuk Original",
-        description: "Seblak dengan kerupuk, telur, dan sayuran segar dengan bumbu rahasia khas Listyaning",
-        price: 15000,
-        category: "seblak",
-        image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
-        spicyLevel: "Pedas",
-        stockQuantity: 25,
-        lowStockThreshold: 5,
-        unit: "porsi",
-        isAvailable: 1,
-        rating: 48,
-        reviewCount: 124
-      },
-      {
-        name: "Seblak Seafood Spesial",
-        description: "Seblak premium dengan udang, cumi, telur, dan topping lengkap yang bikin nagih",
-        price: 25000,
-        category: "seblak",
-        image: "https://images.unsplash.com/photo-1563379091339-03246963d925?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
-        spicyLevel: "Spesial",
-        stockQuantity: 15,
-        lowStockThreshold: 3,
-        unit: "porsi",
-        isAvailable: 1,
-        rating: 49,
-        reviewCount: 89
-      },
-      {
-        name: "Seblak Telur Sayuran",
-        description: "Seblak dengan telur rebus, sayuran segar, cocok untuk yang tidak suka pedas",
-        price: 12000,
-        category: "seblak",
-        image: "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
-        spicyLevel: "Tidak Pedas",
-        stockQuantity: 30,
-        lowStockThreshold: 8,
-        unit: "porsi",
-        isAvailable: 1,
-        rating: 47,
-        reviewCount: 67
-      },
-      {
-        name: "Seblak Keju Mozarella",
-        description: "Seblak dengan keju mozarella yang meleleh, perpaduan gurih dan pedas yang sempurna",
-        price: 20000,
-        category: "seblak",
-        image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
-        spicyLevel: "Keju",
-        stockQuantity: 8,
-        lowStockThreshold: 5,
-        unit: "porsi",
-        isAvailable: 1,
-        rating: 48,
-        reviewCount: 95
-      },
-      {
-        name: "Es Teh Manis",
-        description: "Teh manis dingin yang menyegarkan, cocok untuk menemani seblak pedas",
-        price: 5000,
-        category: "minuman",
-        image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
-        spicyLevel: "Dingin",
-        stockQuantity: 50,
-        lowStockThreshold: 15,
-        unit: "gelas",
-        isAvailable: 1,
-        rating: 46,
-        reviewCount: 45
-      },
-      {
-        name: "Ayam Goreng Crispy",
-        description: "Ayam goreng crispy dengan bumbu rahasia, cocok sebagai lauk tambahan atau makanan utama",
-        price: 18000,
-        category: "makanan",
-        image: "https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
-        spicyLevel: "Gurih",
-        stockQuantity: 12,
-        lowStockThreshold: 5,
-        unit: "porsi",
-        isAvailable: 1,
-        rating: 47,
-        reviewCount: 78
-      },
-      {
-        name: "Kerupuk Mentah",
-        description: "Kerupuk mentah berkualitas untuk pelengkap seblak atau cemilan dirumah",
-        price: 8000,
-        category: "cemilan",
-        image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
-        spicyLevel: "Cemilan",
-        stockQuantity: 25,
-        lowStockThreshold: 10,
-        unit: "pack",
-        isAvailable: 1,
-        rating: 45,
-        reviewCount: 32
-      }
-    ];
-
     defaultMenuItems.forEach(item => {
       const menuItem: MenuItem = { ...item, id: this.currentMenuId++ };
       this.menuItems.set(menuItem.id, menuItem);
