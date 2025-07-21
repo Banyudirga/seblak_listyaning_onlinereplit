@@ -3,9 +3,9 @@ import { Utensils, Phone } from "lucide-react";
 
 export default function Hero() {
   const scrollToMenu = () => {
-    const menuSection = document.getElementById('menu');
+    const menuSection = document.getElementById("menu");
     if (menuSection) {
-      menuSection.scrollIntoView({ behavior: 'smooth' });
+      menuSection.scrollIntoView({ behavior: "smooth" });
     }
   };
 
@@ -15,13 +15,14 @@ export default function Hero() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
           <div>
             <h2 className="text-3xl md:text-5xl font-bold mb-4">
-              Seblak Pedas Terenak di Bandung!
+              Seblak Pedas Terenak !
             </h2>
             <p className="text-lg md:text-xl mb-6 text-red-100">
-              Pesan seblak autentik dengan cita rasa khas Indonesia. Antar gratis untuk pesanan di atas Rp 50.000!
+              Pesan seblak autentik dengan cita rasa khas Indonesia. Antar
+              gratis untuk pesanan di atas Rp 50.000!
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button 
+              <Button
                 onClick={scrollToMenu}
                 className="bg-warm-orange text-white hover:bg-orange-600"
               >
@@ -38,9 +39,9 @@ export default function Hero() {
             </div>
           </div>
           <div className="relative">
-            <img 
-              src="https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600" 
-              alt="Seblak Listyaning - Hidangan Seblak Lezat" 
+            <img
+              src="https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600"
+              alt="Seblak Listyaning - Hidangan Seblak Lezat"
               className="rounded-2xl shadow-2xl w-full h-auto"
               loading="lazy"
             />
