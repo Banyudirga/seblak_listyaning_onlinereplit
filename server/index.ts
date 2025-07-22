@@ -68,6 +68,28 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
+  // Add CORS middleware for production
+if (process.env.NODE_ENV === 'production') {
+  app.use((req, res, next) => {
+    // Replace with your Vercel domain
+    const allowedOrigins = ['https://your-vercel-domain.vercel.app'];
+    const origin = req.headers.origin;
+    
+    if (origin && allowedOrigins.includes(origin)) {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+    }
+    
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    
+    if (req.method === 'OPTIONS') {
+      return res.status(200).end();
+    }
+    
+    next();
+  });
+}
   // ALWAYS serve the app on the port specified in the environment variable PORT
   // Other ports are firewalled. Default to 5000 if not specified.
   // this serves both the API and the client.
