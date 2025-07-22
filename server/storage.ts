@@ -1,4 +1,4 @@
-import { menuItems, orders, type MenuItem, type Order, type InsertOrder, type InsertMenuItem } from "@shared/schema";
+import { type MenuItem, type Order, type InsertOrder, type InsertMenuItem } from "@shared/schema";
 import { defaultMenuItems } from "./mock-data";
 
 export interface IStorage {
@@ -93,4 +93,11 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+// Import the SupabaseStorage implementation
+import { SupabaseStorage } from "./supabase-storage";
+
+// Use SupabaseStorage if SUPABASE_URL and SUPABASE_KEY are provided, otherwise fallback to MemStorage
+const useSupabase = process.env.SUPABASE_URL && process.env.SUPABASE_KEY;
+
+// Export the appropriate storage implementation
+export const storage = useSupabase ? new SupabaseStorage() : new MemStorage();
