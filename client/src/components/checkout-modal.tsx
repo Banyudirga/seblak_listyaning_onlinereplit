@@ -25,11 +25,30 @@ import {
 const checkoutSchema = z.object({
   customerName: z.string().min(1, "Nama lengkap wajib diisi"),
   customerPhone: z.string().min(10, "Nomor telepon tidak valid"),
-  customerAddress: z.string().min(10, "Alamat lengkap wajib diisi"),
   serviceType: z.string().min(1, "Cara pelayanan wajib dipilih"),
+  customerAddress: z.string().refine(
+    (val) => {
+      // If service type is "diantar", address is required
+      if (val === "" && window.serviceTypeValue === "diantar") {
+        return false;
+      }
+      // For other service types, any address is valid
+      return true;
+    },
+    {
+      message: "Alamat lengkap wajib diisi untuk pengantaran",
+    }
+  ),
   paymentMethod: z.string().min(1, "Metode pembayaran wajib dipilih"),
   notes: z.string().optional(),
 });
+
+// Declare global window property for service type value
+declare global {
+  interface Window {
+    serviceTypeValue: string;
+  }
+}
 
 type CheckoutForm = z.infer<typeof checkoutSchema>;
 
@@ -90,6 +109,10 @@ export default function CheckoutModal() {
   });
 
   const onSubmit = (data: CheckoutForm) => {
+    // Play notification sound for admin
+    const notificationEvent = new CustomEvent('newOrderNotification', { detail: data });
+    window.dispatchEvent(notificationEvent);
+    
     createOrderMutation.mutate(data);
   };
 
@@ -108,7 +131,7 @@ export default function CheckoutModal() {
         <CardContent className="p-6">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-2xl font-bold text-dark-grey">
-              Informasi Pengiriman
+              INFORMASI PEMESANAN
             </h3>
             <Button
               variant="ghost"
@@ -127,7 +150,7 @@ export default function CheckoutModal() {
                 name="customerName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Nama Lengkap</FormLabel>
+                    <FormLabel>Nama Lengkap (Wajib)</FormLabel>
                     <FormControl>
                       <Input placeholder="Masukkan nama lengkap" {...field} />
                     </FormControl>
@@ -141,27 +164,9 @@ export default function CheckoutModal() {
                 name="customerPhone"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Nomor Telepon</FormLabel>
+                    <FormLabel>Nomor Telepon (Wajib)</FormLabel>
                     <FormControl>
                       <Input placeholder="08xxxxxxxxxx" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="customerAddress"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Alamat Lengkap</FormLabel>
-                    <FormControl>
-                      <Textarea 
-                        placeholder="Jl. Nama Jalan No. 123, Kelurahan, Kecamatan"
-                        rows={3}
-                        {...field} 
-                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -173,8 +178,15 @@ export default function CheckoutModal() {
                 name="serviceType"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Cara Pelayanan</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormLabel>Cara Pelayanan (Wajib)</FormLabel>
+                    <Select 
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        // Store service type value in window object for validation
+                        window.serviceTypeValue = value;
+                      }} 
+                      defaultValue={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Pilih cara pelayanan" />
@@ -186,6 +198,26 @@ export default function CheckoutModal() {
                         <SelectItem value="makan ditempat">Makan ditempat</SelectItem>
                       </SelectContent>
                     </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="customerAddress"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Alamat Lengkap {form.watch("serviceType") === "diantar" && "(Wajib)"}
+                    </FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="Jl. Nama Jalan No. 123, Kelurahan, Kecamatan"
+                        rows={3}
+                        {...field} 
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}

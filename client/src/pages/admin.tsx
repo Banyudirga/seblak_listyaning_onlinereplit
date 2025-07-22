@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,6 +18,41 @@ export default function Admin() {
     queryKey: ['/api/admin/orders'],
     refetchInterval: 10000, // Auto-refresh every 10 seconds
   });
+  
+  // Setup audio notification for new orders
+  useEffect(() => {
+    // Load notification script
+    const script = document.createElement('script');
+    script.src = '/notification.js';
+    script.async = true;
+    document.body.appendChild(script);
+    
+    // Event listener for new order notifications
+    const handleNewOrderNotification = () => {
+      // Play notification sound using the Web Audio API
+      if (window.generateNotificationSound) {
+        window.generateNotificationSound();
+      }
+      
+      toast({
+        title: "New Order Received!",
+        description: "You have a new order to process.",
+        variant: "default",
+      });
+      
+      // Refresh orders list
+      refetch();
+    };
+    
+    // Add event listener
+    window.addEventListener('newOrderNotification', handleNewOrderNotification);
+    
+    // Cleanup
+    return () => {
+      window.removeEventListener('newOrderNotification', handleNewOrderNotification);
+      document.body.removeChild(script);
+    };
+  }, [toast, refetch]);
 
   const updateOrderMutation = useMutation({
     mutationFn: async ({ orderId, status }: { orderId: number; status: string }) => {

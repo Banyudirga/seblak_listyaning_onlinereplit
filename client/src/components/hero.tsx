@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Utensils, Phone } from "lucide-react";
+import { Utensils, MessageCircle } from "lucide-react";
 
 export default function Hero() {
   const scrollToMenu = () => {
@@ -30,17 +30,19 @@ export default function Hero() {
                 Lihat Menu
               </Button>
               <a
-                href="tel:+6281234567890"
-                className="inline-flex items-center justify-center rounded-md border-2 border-white text-white px-4 py-2 font-medium hover:bg-white hover:text-indonesian-red transition-colors"
+                href="https://wa.me/6281234567890"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center rounded-md bg-[#25D366] text-white px-4 py-2 font-medium hover:bg-[#128C7E] transition-colors"
               >
-                <Phone className="h-4 w-4 mr-2" />
+                <MessageCircle className="h-4 w-4 mr-2" />
                 Hubungi Kami
               </a>
             </div>
           </div>
           <div className="relative">
             <img
-              src="https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600"
+              src="https://images.pexels.com/photos/6646351/pexels-photo-6646351.jpeg?auto=compress&cs=tinysrgb&w=800&h=600"
               alt="Seblak Listyaning - Hidangan Seblak Lezat"
               className="rounded-2xl shadow-2xl w-full h-auto"
               loading="lazy"
