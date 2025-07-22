@@ -120,6 +120,23 @@ This application uses Supabase as its database and storage solution. The applica
 
 You can manage your data directly through the Supabase dashboard.
 
+### Seeding the Database
+
+To populate your Supabase database with the default menu items, you can use the provided seeding script:
+
+```bash
+# Navigate to the scripts directory
+cd scripts
+
+# Install dependencies
+npm install
+
+# Run the seeding script (TypeScript version)
+npm run seed:ts
+```
+
+This will add all the menu items from `server/mock-data.ts` to your Supabase database. For more details, see the [Scripts README](./scripts/README.md).
+
 ## Image Storage
 
 For storing menu item images, you have two options:
