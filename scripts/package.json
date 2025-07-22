@@ -2,10 +2,10 @@
   "name": "seblak-delivery-scripts",
   "version": "1.0.0",
   "description": "Scripts for Seblak Delivery app",
-  "main": "seed-supabase.js",
+  "type": "module",
+  "main": "seed-supabase.ts",
   "scripts": {
-    "seed": "node seed-supabase.js",
-    "seed:ts": "tsx seed-supabase.ts"
+    "seed": "tsx seed-supabase.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.7",

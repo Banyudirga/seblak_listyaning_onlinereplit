@@ -1,11 +1,8 @@
 import type { MenuItem } from "@shared/schema";
+import { getStockStatus as getItemStockStatus } from "@shared/inventory-utils";
 
-export const getStockStatus = (item: MenuItem) => {
-  if (!item.isAvailable) return { status: 'unavailable', color: 'bg-gray-100 text-gray-800' };
-  if (item.stockQuantity === 0) return { status: 'out-of-stock', color: 'bg-red-100 text-red-800' };
-  if (item.stockQuantity <= item.lowStockThreshold) return { status: 'low-stock', color: 'bg-yellow-100 text-yellow-800' };
-  return { status: 'in-stock', color: 'bg-green-100 text-green-800' };
-};
+// Re-export the shared utility function with the same interface
+export const getStockStatus = getItemStockStatus;
 
 export const getStockStatusText = (status: string) => {
   switch (status) {

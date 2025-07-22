@@ -8,8 +8,14 @@ import type { Database } from '../server/database.types';
 dotenv.config({ path: '../.env' });
 
 // Initialize Supabase client
-const supabaseUrl = process.env.SUPABASE_URL || 'https://nalxmoworcikparifjyu.supabase.co';
-const supabaseKey = process.env.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hbHhtb3dvcmNpa3Bhcmlmanl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMxNjU3NzYsImV4cCI6MjA2ODc0MTc3Nn0.g6DXOsRtuOftYCejvReMAUzyyeQv6HAYuqfizU4cFC8';
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_KEY;
+
+if (!supabaseUrl || !supabaseKey) {
+  console.error('Error: SUPABASE_URL and SUPABASE_KEY environment variables must be set.');
+  console.error('Please check your .env file or environment variables.');
+  process.exit(1);
+}
 
 const supabase = createClient<Database>(supabaseUrl, supabaseKey);
 

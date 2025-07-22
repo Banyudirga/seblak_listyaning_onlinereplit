@@ -7,6 +7,7 @@ import { AlertTriangle, Package, ArrowLeft, AlertCircle, PlusCircle } from "luci
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { MenuItem, InsertMenuItem } from "@shared/schema";
+import { calculateInventoryStats } from "@shared/inventory-utils";
 import { Link } from "wouter";
 import InventoryCard from "@/components/inventory-card";
 import EditStockDialog, { type UpdateStockForm } from "@/components/edit-stock-dialog";
@@ -122,12 +123,7 @@ export default function Inventory() {
     selectedCategory === "all" || item.category === selectedCategory
   );
 
-  const inventoryStats = {
-    total: menuItems.length,
-    available: menuItems.filter((item: MenuItem) => item.isAvailable && item.stockQuantity > 0).length,
-    lowStock: menuItems.filter((item: MenuItem) => item.isAvailable && item.stockQuantity <= item.lowStockThreshold && item.stockQuantity > 0).length,
-    outOfStock: menuItems.filter((item: MenuItem) => item.stockQuantity === 0).length,
-  };
+  const inventoryStats = calculateInventoryStats(menuItems);
 
   const handleUpdateStock = (data: UpdateStockForm) => {
     if (editingItem) {
