@@ -2,7 +2,7 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist/public",
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "seblaklistyaningonlinereplit-production.up.railway.app" },
+    { "source": "/api/(.*)", "destination": "https://seblaklistyaningonlinereplit-production.up.railway.app/api/$1" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
