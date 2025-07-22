@@ -7,6 +7,7 @@ import { defaultMenuItems } from "./mock-data";
 export interface IStorage {
   getAllMenuItems(): Promise<MenuItem[]>;
   getMenuItemsByCategory(category: string): Promise<MenuItem[]>;
+  createMenuItem(menuItem: InsertMenuItem): Promise<MenuItem>;
   updateMenuItemStock(id: number, stockQuantity: number, lowStockThreshold: number): Promise<MenuItem | undefined>;
   updateMenuItemAvailability(id: number, isAvailable: number): Promise<MenuItem | undefined>;
   createOrder(order: InsertOrder): Promise<Order>;
@@ -42,6 +43,18 @@ export class MemStorage implements IStorage {
 
   async getMenuItemsByCategory(category: string): Promise<MenuItem[]> {
     return Array.from(this.menuItems.values()).filter(item => item.category === category);
+  }
+
+  async createMenuItem(menuItem: InsertMenuItem): Promise<MenuItem> {
+    const id = this.currentMenuId++;
+    const newMenuItem: MenuItem = {
+      ...menuItem,
+      id,
+      rating: menuItem.rating || 45,
+      reviewCount: menuItem.reviewCount || 0
+    };
+    this.menuItems.set(id, newMenuItem);
+    return newMenuItem;
   }
 
   async createOrder(insertOrder: InsertOrder): Promise<Order> {

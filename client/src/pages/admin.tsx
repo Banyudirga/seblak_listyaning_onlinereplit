@@ -3,7 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FileText, RefreshCw, Package } from "lucide-react";
+import { FileText, RefreshCw, Package, ArrowLeft, Home } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
@@ -66,6 +66,12 @@ export default function Admin() {
             <div>
               <h1 className="text-2xl font-bold">Seblak Listyaning - Admin</h1>
               <p className="text-red-100">Dashboard Pemilik Restoran</p>
+              <Link href="/" className="inline-block mt-1">
+                <Button variant="outline" size="sm" className="text-indonesian-red border-white hover:bg-white text-xs py-1 h-auto">
+                  <ArrowLeft className="h-3 w-3 mr-1" />
+                  Kembali
+                </Button>
+              </Link>
             </div>
             <div className="flex gap-3">
               <Link href="/inventory">

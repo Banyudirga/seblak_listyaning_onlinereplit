@@ -7,6 +7,10 @@
     <meta name="description" content="Pesan seblak lezat dari Seblak Listyaning dengan layanan antar cepat. Menu seblak autentik dengan harga terjangkau, pesan online sekarang!">
     <meta name="keywords" content="seblak online, pesan seblak, seblak antar, seblak listyaning, makanan indonesia, seblak pedas">
     <meta name="author" content="Seblak Listyaning">
+    <meta name="theme-color" content="#f43f5e">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" href="/icons/icon-192x192.svg">
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.svg">
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
@@ -52,5 +56,20 @@
     <script type="module" src="/src/main.tsx"></script>
     <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
     <script type="text/javascript" src="https://replit.com/public/js/replit-dev-banner.js"></script>
+    
+    <!-- Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/service-worker.js')
+            .then(registration => {
+              console.log('Service Worker registered with scope:', registration.scope);
+            })
+            .catch(error => {
+              console.error('Service Worker registration failed:', error);
+            });
+        });
+      }
+    </script>
   </body>
 </html>

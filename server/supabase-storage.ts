@@ -8,6 +8,49 @@ export class SupabaseStorage implements IStorage {
     // Initialize the database with default menu items if needed
     this.initializeMenuItems();
   }
+  
+  async createMenuItem(menuItem: InsertMenuItem): Promise<MenuItem> {
+    const { data, error } = await supabase
+      .from('menu_items')
+      .insert({
+        name: menuItem.name,
+        description: menuItem.description,
+        price: menuItem.price,
+        category: menuItem.category,
+        image: menuItem.image,
+        spicy_level: menuItem.spicyLevel,
+        stock_quantity: menuItem.stockQuantity,
+        low_stock_threshold: menuItem.lowStockThreshold,
+        unit: menuItem.unit,
+        is_available: menuItem.isAvailable,
+        rating: menuItem.rating || 45,
+        review_count: menuItem.reviewCount || 0
+      })
+      .select('*')
+      .single();
+
+    if (error) {
+      console.error('Error creating menu item:', error);
+      throw new Error(`Failed to create menu item: ${error.message}`);
+    }
+
+    // Transform the data to match the MenuItem type
+    return {
+      id: data.id,
+      name: data.name,
+      description: data.description,
+      price: data.price,
+      category: data.category,
+      image: data.image,
+      spicyLevel: data.spicy_level,
+      stockQuantity: data.stock_quantity,
+      lowStockThreshold: data.low_stock_threshold,
+      unit: data.unit,
+      isAvailable: data.is_available,
+      rating: data.rating,
+      reviewCount: data.review_count
+    };
+  }
 
   private async initializeMenuItems() {
     // Check if menu items already exist

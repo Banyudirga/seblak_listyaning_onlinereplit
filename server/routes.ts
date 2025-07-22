@@ -1,7 +1,7 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertOrderSchema } from "@shared/schema";
+import { insertOrderSchema, insertMenuItemSchema } from "@shared/schema";
 import { z } from "zod";
 
 // --- Reusable Route Handlers ---
@@ -156,6 +156,21 @@ const updateMenuItemAvailability = async (req: Request, res: Response) => {
   }
 };
 
+const createMenuItem = async (req: Request, res: Response) => {
+  try {
+    const validatedMenuItem = insertMenuItemSchema.parse(req.body);
+    const menuItem = await storage.createMenuItem(validatedMenuItem);
+    res.status(201).json(menuItem);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ message: "Invalid menu item data", errors: error.errors });
+    } else {
+      console.error("Error creating menu item:", error);
+      res.status(500).json({ message: "Failed to create menu item" });
+    }
+  }
+};
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // --- Public API Routes ---
   app.get("/api/menu", getAllMenuItems);
@@ -169,6 +184,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/admin/orders", getAllOrders); // Reuse handler
   app.patch("/api/admin/orders/:id/status", adminUpdateOrderStatus);
   app.get("/api/admin/inventory", getAllMenuItems); // Reuse handler
+  app.post("/api/admin/inventory", createMenuItem);
   app.patch("/api/admin/inventory/:id", updateMenuItemStock);
   app.patch("/api/admin/inventory/:id/availability", updateMenuItemAvailability);
 
