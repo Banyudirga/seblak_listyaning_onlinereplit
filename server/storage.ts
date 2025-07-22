@@ -1,3 +1,6 @@
+// Import environment variables first
+import './env';
+
 import { type MenuItem, type Order, type InsertOrder, type InsertMenuItem } from "@shared/schema";
 import { defaultMenuItems } from "./mock-data";
 
@@ -96,8 +99,30 @@ export class MemStorage implements IStorage {
 // Import the SupabaseStorage implementation
 import { SupabaseStorage } from "./supabase-storage";
 
-// Use SupabaseStorage if SUPABASE_URL and SUPABASE_KEY are provided, otherwise fallback to MemStorage
-const useSupabase = process.env.SUPABASE_URL && process.env.SUPABASE_KEY;
+// Create a storage instance variable
+let storageInstance: IStorage | null = null;
 
-// Export the appropriate storage implementation
-export const storage = useSupabase ? new SupabaseStorage() : new MemStorage();
+// Function to get or initialize the storage
+export const getStorage = (): IStorage => {
+  if (storageInstance) {
+    return storageInstance;
+  }
+
+  // Use SupabaseStorage if SUPABASE_URL and SUPABASE_KEY are provided, otherwise fallback to MemStorage
+  const useSupabase = process.env.SUPABASE_URL && process.env.SUPABASE_KEY;
+
+  // Log which storage implementation is being used
+  console.log('Environment variables when initializing storage:', {
+    SUPABASE_URL: process.env.SUPABASE_URL,
+    SUPABASE_KEY: process.env.SUPABASE_KEY ? '[REDACTED]' : undefined,
+    useSupabase
+  });
+
+  // Initialize the appropriate storage implementation
+  storageInstance = useSupabase ? new SupabaseStorage() : new MemStorage();
+  console.log('Using storage implementation:', useSupabase ? 'SupabaseStorage' : 'MemStorage');
+  return storageInstance;
+};
+
+// For backward compatibility
+export const storage = getStorage();

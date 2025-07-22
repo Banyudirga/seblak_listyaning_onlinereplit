@@ -1,10 +1,18 @@
-import express, { type Request, Response, NextFunction } from "express";
-import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
-import dotenv from 'dotenv';
+// Import environment variables first
+import './env';
 
-// Load environment variables from .env file
-dotenv.config();
+import express, { type Request, Response, NextFunction } from "express";
+import { setupVite, serveStatic, log } from "./vite";
+
+// Import getStorage directly to avoid early initialization
+import { getStorage } from "./storage";
+
+// Force re-initialization of storage after environment variables are loaded
+const storage = getStorage();
+console.log('Storage initialized after environment variables loaded');
+
+// Import routes after storage is initialized
+import { registerRoutes } from "./routes";
 
 const app = express();
 app.use(express.json());
