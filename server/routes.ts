@@ -88,50 +88,31 @@ const adminUpdateOrderStatus = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
     const { status } = req.body;
-    
+
     if (!status || typeof status !== 'string') {
-      return res.status(400).json({ error: "Status is required" });
+      return res.status(400).json({ error: 'Status is required' });
     }
 
     const validStatuses = ['pending', 'confirmed', 'preparing', 'ready', 'delivered', 'cancelled'];
     if (!validStatuses.includes(status)) {
-      return res.status(400).json({ error: "Invalid status" });
+      return res.status(400).json({ error: 'Invalid status' });
     }
 
-    const order = await storage.updateOrderStatus(id, status);
+    let order;
+    try {
+      order = await storage.updateOrderStatus(id, status);
+    } catch (error: any) {
+      return res.status(500).json({ error: error.message });
+    }
+
     if (!order) {
-      return res.status(404).json({ error: "Order not found" });
+      return res.status(404).json({ error: 'Order not found' });
     }
 
     res.json(order);
   } catch (error) {
-    console.error("Error updating order status:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-};
-
-const updateMenuItemStock = async (req: Request, res: Response) => {
-  try {
-    const id = parseInt(req.params.id);
-    const { stockQuantity, lowStockThreshold } = req.body;
-    
-    if (typeof stockQuantity !== 'number' || typeof lowStockThreshold !== 'number') {
-      return res.status(400).json({ error: "Stock quantities must be numbers" });
-    }
-
-    if (stockQuantity < 0 || lowStockThreshold < 1) {
-      return res.status(400).json({ error: "Invalid stock values" });
-    }
-
-    const item = await storage.updateMenuItemStock(id, stockQuantity, lowStockThreshold);
-    if (!item) {
-      return res.status(404).json({ error: "Menu item not found" });
-    }
-
-    res.json(item);
-  } catch (error) {
-    console.error("Error updating stock:", error);
-    res.status(500).json({ error: "Internal server error" });
+    console.error('Error updating order status:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 };
 
