@@ -149,6 +149,58 @@ export class SupabaseStorage implements IStorage {
     }));
   }
 
+  async getMenuItem(id: number): Promise<MenuItem | undefined> {
+  const { data, error } = await supabase
+    .from('menu_items')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (error) {
+    console.error(`Error fetching menu item ${id}:`, error);
+    return undefined;
+  }
+
+  return {
+    id: data.id,
+    name: data.name,
+    description: data.description,
+    price: data.price,
+    category: data.category,
+    image: data.image,
+    spicyLevel: data.spicy_level,
+    stockQuantity: data.stock_quantity,
+    lowStockThreshold: data.low_stock_threshold,
+    unit: data.unit,
+    isAvailable: data.is_available,
+    rating: data.rating,
+    reviewCount: data.review_count
+  };
+}
+
+private async deductStockForOrder(order: Order): Promise<void> {
+  try {
+    for (const item of order.items) {
+      const menuItem = await this.getMenuItem(item.id);
+      
+      if (menuItem) {
+        // Calculate new stock (prevent going below 0)
+        const newStock = Math.max(0, menuItem.stockQuantity - item.quantity);
+        
+        await this.updateMenuItemStock(
+          item.id,
+          newStock,
+          menuItem.lowStockThreshold
+        );
+        
+        console.log(`Deducted ${item.quantity} from ${menuItem.name}. New stock: ${newStock}`);
+      }
+    }
+  } catch (error) {
+    console.error('Error deducting stock for order:', error);
+  }
+}
+
   async updateMenuItemStock(id: number, stockQuantity: number, lowStockThreshold: number): Promise<MenuItem | undefined> {
     const { data, error } = await supabase
       .from('menu_items')
@@ -310,33 +362,41 @@ export class SupabaseStorage implements IStorage {
   }
 
   async updateOrderStatus(id: number, status: string): Promise<Order | undefined> {
-    const { data, error } = await supabase
-      .from('orders')
-      .update({
-        status: status
-      })
-      .eq('id', id)
-      .select('*')
-      .single();
+  const { data, error } = await supabase
+    .from('orders')
+    .update({
+      status: status
+    })
+    .eq('id', id)
+    .select('*')
+    .single();
 
-    if (error) {
-      console.error(`Error updating status for order ${id}:`, error);
-      return undefined;
-    }
-
-    // Transform the data to match the Order type
-    return {
-      id: data.id,
-      customerName: data.customer_name,
-      customerPhone: data.customer_phone,
-      customerAddress: data.customer_address,
-      serviceType: data.service_type,
-      paymentMethod: data.payment_method,
-      notes: data.notes,
-      items: data.items,
-      totalAmount: data.total_amount,
-      status: data.status,
-      createdAt: new Date(data.created_at)
-    };
+  if (error) {
+    console.error(`Error updating status for order ${id}:`, error);
+    return undefined;
   }
+
+  const updatedOrder: Order = {
+    id: data.id,
+    customerName: data.customer_name,
+    customerPhone: data.customer_phone,
+    customerAddress: data.customer_address,
+    serviceType: data.service_type,
+    paymentMethod: data.payment_method,
+    notes: data.notes,
+    items: data.items,
+    totalAmount: data.total_amount,
+    status: data.status,
+    createdAt: new Date(data.created_at)
+  };
+
+  // Deduct stock when order is confirmed or preparing
+  if (status === 'confirmed' || status === 'preparing') {
+    await this.deductStockForOrder(updatedOrder);
+  }
+
+  return updatedOrder;
+}
+
+
 }
