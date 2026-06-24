@@ -180,25 +180,64 @@ export class SupabaseStorage implements IStorage {
 
 private async deductStockForOrder(order: Order): Promise<void> {
   try {
-    for (const item of order.items) {
+    const items = Array.isArray(order.items)
+      ? (order.items as Array<{ id: number; quantity: number }>)
+      : [];
+
+    for (const item of items) {
       const menuItem = await this.getMenuItem(item.id);
-      
+
       if (menuItem) {
-        // Calculate new stock (prevent going below 0)
-        const newStock = Math.max(0, menuItem.stockQuantity - item.quantity);
-        
+        const currentStock = Number(menuItem.stockQuantity ?? 0);
+        const currentThreshold = Number(menuItem.lowStockThreshold ?? 0);
+        const newStock = Math.max(0, currentStock - item.quantity);
+
         await this.updateMenuItemStock(
           item.id,
           newStock,
-          menuItem.lowStockThreshold
+          currentThreshold
         );
-        
+
         console.log(`Deducted ${item.quantity} from ${menuItem.name}. New stock: ${newStock}`);
       }
     }
   } catch (error) {
     console.error('Error deducting stock for order:', error);
   }
+}
+
+async updateOrderStatus(id: number, status: string): Promise<Order | undefined> {
+  const { data, error } = await supabase
+    .from('orders')
+    .update({ status })
+    .eq('id', id)
+    .select('*')
+    .single();
+
+  if (error) {
+    console.error(`Error updating status for order ${id}:`, error);
+    throw new Error(error.message || 'Failed to update order status');
+  }
+
+  const updatedOrder: Order = {
+    id: data.id,
+    customerName: data.customer_name,
+    customerPhone: data.customer_phone,
+    customerAddress: data.customer_address,
+    serviceType: data.service_type,
+    paymentMethod: data.payment_method,
+    notes: data.notes,
+    items: data.items,
+    totalAmount: data.total_amount,
+    status: data.status,
+    createdAt: new Date(data.created_at)
+  };
+
+  if (status === 'confirmed' || status === 'preparing') {
+    await this.deductStockForOrder(updatedOrder);
+  }
+
+  return updatedOrder;
 }
 
   async updateMenuItemStock(id: number, stockQuantity: number, lowStockThreshold: number): Promise<MenuItem | undefined> {
