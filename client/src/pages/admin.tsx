@@ -65,7 +65,15 @@ export default function Admin() {
         description: "Order status has been updated successfully.",
       });
     },
-  });
+    onError: (error) => {
+    console.error("Mutation error:", error);
+    toast({
+      title: "Error",
+      description: `Failed to update status: ${error.message}`,
+      variant: "destructive",
+    });
+  },
+});
 
   const filteredOrders = orders.filter((order: Order) => 
     selectedStatus === "all" || order.status === selectedStatus
