@@ -116,6 +116,31 @@ const adminUpdateOrderStatus = async (req: Request, res: Response) => {
   }
 };
 
+const updateMenuItemStock = async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id);
+    const { stockQuantity, lowStockThreshold } = req.body;
+
+    if (typeof stockQuantity !== 'number' || typeof lowStockThreshold !== 'number') {
+      return res.status(400).json({ error: "Stock quantities must be numbers" });
+    }
+
+    if (stockQuantity < 0 || lowStockThreshold < 1) {
+      return res.status(400).json({ error: "Invalid stock values" });
+    }
+
+    const item = await storage.updateMenuItemStock(id, stockQuantity, lowStockThreshold);
+    if (!item) {
+      return res.status(404).json({ error: "Menu item not found" });
+    }
+
+    res.json(item);
+  } catch (error) {
+    console.error("Error updating stock:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 const updateMenuItemAvailability = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
