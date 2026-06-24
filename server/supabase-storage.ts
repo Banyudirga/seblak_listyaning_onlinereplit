@@ -399,42 +399,4 @@ async updateOrderStatus(id: number, status: string): Promise<Order | undefined> 
       createdAt: new Date(order.created_at)
     }));
   }
-
-  async updateOrderStatus(id: number, status: string): Promise<Order | undefined> {
-    const { data, error } = await supabase
-      .from('orders')
-      .update({ status })
-      .eq('id', id)
-      .select('*')
-      .single();
-
-    if (error) {
-      console.error(`Error updating status for order ${id}:`, error);
-      throw new Error(error.message || 'Failed to update order status');
-    }
-
-    return {
-      id: data.id,
-      customerName: data.customer_name,
-      customerPhone: data.customer_phone,
-      customerAddress: data.customer_address,
-      serviceType: data.service_type,
-      paymentMethod: data.payment_method,
-      notes: data.notes,
-      items: data.items,
-      totalAmount: data.total_amount,
-      status: data.status,
-      createdAt: new Date(data.created_at)
-    };
-  }
-
-  // Deduct stock when order is confirmed or preparing
-  if (status === 'confirmed' || status === 'preparing') {
-    await this.deductStockForOrder(updatedOrder);
-  }
-
-  return updatedOrder;
-}
-
-
 }
