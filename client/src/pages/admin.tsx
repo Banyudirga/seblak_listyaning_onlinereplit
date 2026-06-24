@@ -55,12 +55,9 @@ export default function Admin() {
   }, [toast, refetch]);
 
   const updateOrderMutation = useMutation({
-    mutationFn: async ({ orderId, status }: { orderId: number; status: string }) => {
-      return apiRequest(`/api/admin/orders/${orderId}/status`, {
-        method: 'PATCH',
-        body: JSON.stringify({ status }),
-      });
-    },
+  mutationFn: async ({ orderId, status }: { orderId: number; status: string }) => {
+    return apiRequest('PATCH', `/api/admin/orders/${orderId}/status`, { status });
+  },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/orders'] });
       toast({
