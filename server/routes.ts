@@ -1,7 +1,7 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertOrderSchema, insertMenuItemSchema } from "@shared/schema";
+import { insertOrderSchema, insertMenuItemSchema, insertSupplySchema, insertSupplyPurchaseSchema, insertMenuItemRecipeSchema } from "@shared/schema";
 import { z } from "zod";
 
 // --- Reusable Route Handlers ---
@@ -177,6 +177,88 @@ const createMenuItem = async (req: Request, res: Response) => {
   }
 };
 
+const getAllSupplies = async (_req: Request, res: Response) => {
+  try {
+    const supplies = await storage.getAllSupplies();
+    res.json(supplies);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch supplies" });
+  }
+};
+
+const createSupply = async (req: Request, res: Response) => {
+  try {
+    const validatedSupply = insertSupplySchema.parse(req.body);
+    const supply = await storage.createSupply(validatedSupply);
+    res.status(201).json(supply);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ message: "Invalid supply data", errors: error.errors });
+    } else {
+      res.status(500).json({ message: "Failed to create supply" });
+    }
+  }
+};
+
+const getAllSupplyPurchases = async (_req: Request, res: Response) => {
+  try {
+    const purchases = await storage.getAllSupplyPurchases();
+    res.json(purchases);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch supply purchases" });
+  }
+};
+
+const createSupplyPurchase = async (req: Request, res: Response) => {
+  try {
+    const validatedPurchase = insertSupplyPurchaseSchema.parse(req.body);
+    const purchase = await storage.createSupplyPurchase(validatedPurchase);
+    res.status(201).json(purchase);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ message: "Invalid supply purchase data", errors: error.errors });
+    } else {
+      res.status(500).json({ message: error instanceof Error ? error.message : "Failed to create supply purchase" });
+    }
+  }
+};
+
+const getMenuItemRecipes = async (req: Request, res: Response) => {
+  try {
+    const menuItemId = parseInt(req.params.menuItemId);
+    const recipes = await storage.getRecipesByMenuItem(menuItemId);
+    res.json(recipes);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch menu item recipes" });
+  }
+};
+
+const getRecipeCoverageSummaries = async (_req: Request, res: Response) => {
+  try {
+    const summary = await storage.getRecipeCoverageSummaries();
+    res.json(summary);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch recipe coverage summary" });
+  }
+};
+
+const replaceMenuItemRecipes = async (req: Request, res: Response) => {
+  try {
+    const menuItemId = parseInt(req.params.menuItemId);
+    const payload = z.array(insertMenuItemRecipeSchema).parse(
+      req.body.map((recipe: z.infer<typeof insertMenuItemRecipeSchema>) => ({ ...recipe, menuItemId }))
+    );
+    const recipes = await storage.replaceMenuItemRecipe(menuItemId, payload);
+    res.json(recipes);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ message: "Invalid recipe data", errors: error.errors });
+    } else {
+      res.status(500).json({ message: "Failed to replace menu item recipes" });
+    }
+  }
+};
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // --- Public API Routes ---
   app.get("/api/menu", getAllMenuItems);
@@ -187,12 +269,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/orders/:id/status", updateOrderStatus);
 
   // --- Admin API Routes ---
-  app.get("/api/admin/orders", getAllOrders); // Reuse handler
+  app.get("/api/admin/orders", getAllOrders);
   app.patch("/api/admin/orders/:id/status", adminUpdateOrderStatus);
-  app.get("/api/admin/inventory", getAllMenuItems); // Reuse handler
+  app.get("/api/admin/inventory", getAllMenuItems);
   app.post("/api/admin/inventory", createMenuItem);
   app.patch("/api/admin/inventory/:id", updateMenuItemStock);
   app.patch("/api/admin/inventory/:id/availability", updateMenuItemAvailability);
+  app.get("/api/admin/supplies", getAllSupplies);
+  app.post("/api/admin/supplies", createSupply);
+  app.get("/api/admin/supply-purchases", getAllSupplyPurchases);
+  app.post("/api/admin/supply-purchases", createSupplyPurchase);
+  app.get("/api/admin/recipes/summary", getRecipeCoverageSummaries);
+  app.get("/api/admin/menu-items/:menuItemId/recipes", getMenuItemRecipes);
+  app.put("/api/admin/menu-items/:menuItemId/recipes", replaceMenuItemRecipes);
 
   const httpServer = createServer(app);
   return httpServer;

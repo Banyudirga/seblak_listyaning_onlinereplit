@@ -10,9 +10,12 @@ import type { MenuItem } from './schema';
  * @returns An object containing status and color information
  */
 export function getStockStatus(item: MenuItem) {
+  const stockQuantity = item.stockQuantity ?? 0;
+  const lowStockThreshold = item.lowStockThreshold ?? 0;
+
   if (!item.isAvailable) return { status: 'unavailable', color: 'bg-gray-100 text-gray-800' };
-  if (item.stockQuantity <= 0) return { status: 'out-of-stock', color: 'bg-red-100 text-red-800' };
-  if (item.stockQuantity <= item.lowStockThreshold) return { status: 'low-stock', color: 'bg-yellow-100 text-yellow-800' };
+  if (stockQuantity <= 0) return { status: 'out-of-stock', color: 'bg-red-100 text-red-800' };
+  if (stockQuantity <= lowStockThreshold) return { status: 'low-stock', color: 'bg-yellow-100 text-yellow-800' };
   return { status: 'in-stock', color: 'bg-green-100 text-green-800' };
 }
 
@@ -24,8 +27,8 @@ export function getStockStatus(item: MenuItem) {
 export function calculateInventoryStats(menuItems: MenuItem[]) {
   return {
     total: menuItems.length,
-    available: menuItems.filter((item: MenuItem) => item.isAvailable && item.stockQuantity > 0).length,
-    lowStock: menuItems.filter((item: MenuItem) => item.isAvailable && item.stockQuantity <= item.lowStockThreshold && item.stockQuantity > 0).length,
-    outOfStock: menuItems.filter((item: MenuItem) => !item.isAvailable || item.stockQuantity <= 0).length,
+    available: menuItems.filter((item: MenuItem) => item.isAvailable && (item.stockQuantity ?? 0) > 0).length,
+    lowStock: menuItems.filter((item: MenuItem) => item.isAvailable && (item.stockQuantity ?? 0) <= (item.lowStockThreshold ?? 0) && (item.stockQuantity ?? 0) > 0).length,
+    outOfStock: menuItems.filter((item: MenuItem) => !item.isAvailable || (item.stockQuantity ?? 0) <= 0).length,
   };
 }

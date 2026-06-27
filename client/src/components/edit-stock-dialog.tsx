@@ -31,8 +31,8 @@ export default function EditStockDialog({ item, isOpen, onClose, onSubmit, isUpd
   useEffect(() => {
     if (item) {
       form.reset({
-        stockQuantity: item.stockQuantity,
-        lowStockThreshold: item.lowStockThreshold,
+        stockQuantity: item.stockQuantity ?? 0,
+        lowStockThreshold: item.lowStockThreshold ?? 1,
       });
     }
   }, [item, form]);

@@ -1,12 +1,32 @@
-import { type MenuItem, type Order, type InsertOrder, type InsertMenuItem } from "@shared/schema";
+import { type MenuItem, type Order, type InsertOrder, type InsertMenuItem, type Supply, type InsertSupply, type SupplyPurchase, type InsertSupplyPurchase, type MenuItemRecipe, type InsertMenuItemRecipe } from "@shared/schema";
 import { supabase } from "./supabase";
 import { IStorage } from "./storage";
 import { defaultMenuItems } from "./mock-data";
 
 export class SupabaseStorage implements IStorage {
   constructor() {
-    // Initialize the database with default menu items if needed
     this.initializeMenuItems();
+  }
+
+  private mapSupply(data: any): Supply {
+    return {
+      id: data.id,
+      name: data.name,
+      unit: data.unit,
+      stockQuantity: data.stock_quantity,
+      lowStockThreshold: data.low_stock_threshold,
+      supplierName: data.supplier_name,
+      createdAt: new Date(data.created_at)
+    };
+  }
+
+  private mapRecipe(data: any): MenuItemRecipe {
+    return {
+      id: data.id,
+      menuItemId: data.menu_item_id,
+      supplyId: data.supply_id,
+      quantityRequired: data.quantity_required
+    };
   }
   
   async createMenuItem(menuItem: InsertMenuItem): Promise<MenuItem> {
@@ -178,35 +198,51 @@ export class SupabaseStorage implements IStorage {
   };
 }
 
-private async deductStockForOrder(order: Order): Promise<void> {
-  try {
-    const items = Array.isArray(order.items)
-      ? (order.items as Array<{ id: number; quantity: number }>)
-      : [];
+private isDeductionStatus(status: string) {
+  return ['confirmed', 'preparing', 'ready', 'delivered'].includes(status);
+}
 
-    for (const item of items) {
-      const menuItem = await this.getMenuItem(item.id);
+private async getRequiredSupplyUsage(order: Order) {
+  const items = Array.isArray(order.items)
+    ? (order.items as Array<{ id: number; quantity: number; name?: string }>)
+    : [];
+  const usage = new Map<number, number>();
 
-      if (menuItem) {
-        const currentStock = Number(menuItem.stockQuantity ?? 0);
-        const currentThreshold = Number(menuItem.lowStockThreshold ?? 0);
-        const newStock = Math.max(0, currentStock - item.quantity);
-
-        await this.updateMenuItemStock(
-          item.id,
-          newStock,
-          currentThreshold
-        );
-
-        console.log(`Deducted ${item.quantity} from ${menuItem.name}. New stock: ${newStock}`);
-      }
+  for (const item of items) {
+    const recipes = await this.getRecipesByMenuItem(item.id);
+    if (recipes.length === 0) throw new Error(`Recipe not configured for ${item.name ?? `menu item #${item.id}`}`);
+    for (const recipe of recipes) {
+      usage.set(recipe.supplyId, (usage.get(recipe.supplyId) ?? 0) + recipe.quantityRequired * item.quantity);
     }
-  } catch (error) {
-    console.error('Error deducting stock for order:', error);
+  }
+
+  return usage;
+}
+
+private async deductStockForOrder(order: Order): Promise<void> {
+  const usage = await this.getRequiredSupplyUsage(order);
+
+  for (const [supplyId, required] of usage.entries()) {
+    const { data: supply, error } = await supabase.from('supplies').select('*').eq('id', supplyId).single();
+    if (error || !supply) throw new Error(`Supply #${supplyId} not found`);
+    if (supply.stock_quantity < required) throw new Error(`Not enough stock for ${supply.name}`);
+
+    const { error: updateError } = await supabase
+      .from('supplies')
+      .update({ stock_quantity: supply.stock_quantity - required })
+      .eq('id', supplyId);
+
+    if (updateError) throw new Error(updateError.message || `Failed to deduct stock for ${supply.name}`);
   }
 }
 
 async updateOrderStatus(id: number, status: string): Promise<Order | undefined> {
+  const existingOrder = await this.getOrder(id);
+  if (!existingOrder) return undefined;
+
+  const shouldDeduct = this.isDeductionStatus(status) && !this.isDeductionStatus(existingOrder.status);
+  if (shouldDeduct) await this.deductStockForOrder(existingOrder);
+
   const { data, error } = await supabase
     .from('orders')
     .update({ status })
@@ -214,12 +250,9 @@ async updateOrderStatus(id: number, status: string): Promise<Order | undefined> 
     .select('*')
     .single();
 
-  if (error) {
-    console.error(`Error updating status for order ${id}:`, error);
-    throw new Error(error.message || 'Failed to update order status');
-  }
+  if (error) throw new Error(error.message || 'Failed to update order status');
 
-  const updatedOrder: Order = {
+  return {
     id: data.id,
     customerName: data.customer_name,
     customerPhone: data.customer_phone,
@@ -232,12 +265,6 @@ async updateOrderStatus(id: number, status: string): Promise<Order | undefined> 
     status: data.status,
     createdAt: new Date(data.created_at)
   };
-
-  if (status === 'confirmed' || status === 'preparing') {
-    await this.deductStockForOrder(updatedOrder);
-  }
-
-  return updatedOrder;
 }
 
   async updateMenuItemStock(id: number, stockQuantity: number, lowStockThreshold: number): Promise<MenuItem | undefined> {
@@ -277,19 +304,13 @@ async updateOrderStatus(id: number, status: string): Promise<Order | undefined> 
   async updateMenuItemAvailability(id: number, isAvailable: number): Promise<MenuItem | undefined> {
     const { data, error } = await supabase
       .from('menu_items')
-      .update({
-        is_available: isAvailable
-      })
+      .update({ is_available: isAvailable })
       .eq('id', id)
       .select('*')
       .single();
 
-    if (error) {
-      console.error(`Error updating availability for menu item ${id}:`, error);
-      return undefined;
-    }
+    if (error) return undefined;
 
-    // Transform the data to match the MenuItem type
     return {
       id: data.id,
       name: data.name,
@@ -305,6 +326,130 @@ async updateOrderStatus(id: number, status: string): Promise<Order | undefined> 
       rating: data.rating,
       reviewCount: data.review_count
     };
+  }
+
+  async getAllSupplies(): Promise<Supply[]> {
+    const { data, error } = await supabase.from('supplies').select('*').order('name');
+    if (error) return [];
+    return data.map((item) => this.mapSupply(item));
+  }
+
+  async createSupply(supply: InsertSupply): Promise<Supply> {
+    const { data, error } = await supabase
+      .from('supplies')
+      .insert({
+        name: supply.name,
+        unit: supply.unit,
+        stock_quantity: supply.stockQuantity,
+        low_stock_threshold: supply.lowStockThreshold,
+        supplier_name: supply.supplierName
+      })
+      .select('*')
+      .single();
+
+    if (error) throw new Error(`Failed to create supply: ${error.message}`);
+    return this.mapSupply(data);
+  }
+
+  async createSupplyPurchase(purchase: InsertSupplyPurchase): Promise<SupplyPurchase> {
+    if (purchase.quantity <= 0) throw new Error('Purchase quantity must be greater than 0');
+    if (purchase.baseUnitsPerPurchaseUnit <= 0) throw new Error('Conversion to base units must be greater than 0');
+    if (purchase.unitCost < 0) throw new Error('Unit cost cannot be negative');
+
+    const totalCost = purchase.quantity * purchase.unitCost;
+    const { data: supply } = await supabase.from('supplies').select('*').eq('id', purchase.supplyId).single();
+    if (!supply) throw new Error('Supply not found');
+
+    const convertedQuantity = purchase.quantity * purchase.baseUnitsPerPurchaseUnit;
+    const { data, error } = await supabase
+      .from('supply_purchases')
+      .insert({
+        supply_id: purchase.supplyId,
+        supplier_name: purchase.supplierName,
+        quantity: purchase.quantity,
+        purchase_unit: purchase.purchaseUnit ?? supply.unit,
+        base_units_per_purchase_unit: purchase.baseUnitsPerPurchaseUnit ?? 1,
+        converted_quantity: convertedQuantity,
+        unit_cost: purchase.unitCost,
+        total_cost: totalCost,
+        notes: purchase.notes
+      })
+      .select('*')
+      .single();
+
+    if (error) throw new Error(`Failed to create supply purchase: ${error.message}`);
+
+    await supabase
+      .from('supplies')
+      .update({ stock_quantity: supply.stock_quantity + convertedQuantity })
+      .eq('id', purchase.supplyId);
+
+    return {
+      id: data.id,
+      supplyId: data.supply_id,
+      supplierName: data.supplier_name,
+      quantity: data.quantity,
+      purchaseUnit: data.purchase_unit,
+      baseUnitsPerPurchaseUnit: data.base_units_per_purchase_unit,
+      convertedQuantity: data.converted_quantity,
+      unitCost: data.unit_cost,
+      totalCost: data.total_cost,
+      notes: data.notes,
+      purchasedAt: new Date(data.purchased_at)
+    };
+  }
+
+  async getAllSupplyPurchases(): Promise<SupplyPurchase[]> {
+    const { data, error } = await supabase.from('supply_purchases').select('*').order('purchased_at', { ascending: false });
+    if (error) return [];
+    return data.map((item) => ({
+      id: item.id,
+      supplyId: item.supply_id,
+      supplierName: item.supplier_name,
+      quantity: item.quantity,
+      purchaseUnit: item.purchase_unit,
+      baseUnitsPerPurchaseUnit: item.base_units_per_purchase_unit,
+      convertedQuantity: item.converted_quantity,
+      unitCost: item.unit_cost,
+      totalCost: item.total_cost,
+      notes: item.notes,
+      purchasedAt: new Date(item.purchased_at)
+    }));
+  }
+
+  async getRecipesByMenuItem(menuItemId: number): Promise<MenuItemRecipe[]> {
+    const { data, error } = await supabase.from('menu_item_recipes').select('*').eq('menu_item_id', menuItemId);
+    if (error) return [];
+    return data.map((item) => this.mapRecipe(item));
+  }
+
+  async getRecipeCoverageSummaries(): Promise<Array<{ menuItemId: number; ingredientCount: number }>> {
+    const { data, error } = await supabase.from('menu_item_recipes').select('menu_item_id');
+    if (error || !data) return [];
+
+    const counts = new Map<number, number>();
+    for (const row of data) {
+      counts.set(row.menu_item_id, (counts.get(row.menu_item_id) ?? 0) + 1);
+    }
+
+    return Array.from(counts.entries()).map(([menuItemId, ingredientCount]) => ({ menuItemId, ingredientCount }));
+  }
+
+  async replaceMenuItemRecipe(menuItemId: number, recipes: InsertMenuItemRecipe[]): Promise<MenuItemRecipe[]> {
+    await supabase.from('menu_item_recipes').delete().eq('menu_item_id', menuItemId);
+    if (recipes.length === 0) return [];
+
+    const { data, error } = await supabase
+      .from('menu_item_recipes')
+      .insert(recipes.map((recipe) => ({
+        menu_item_id: menuItemId,
+        supply_id: recipe.supplyId,
+        quantity_required: recipe.quantityRequired
+      })))
+      .select('*');
+
+    if (error) throw new Error(`Failed to replace recipe: ${error.message}`);
+    return data.map((item) => this.mapRecipe(item));
   }
 
   async createOrder(order: InsertOrder): Promise<Order> {

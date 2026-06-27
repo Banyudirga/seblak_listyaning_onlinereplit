@@ -97,6 +97,96 @@ export interface Database {
           created_at?: string | null
         }
       }
+      supplies: {
+        Row: {
+          id: number
+          name: string
+          unit: string
+          stock_quantity: number
+          low_stock_threshold: number
+          supplier_name: string | null
+          created_at: string | null
+        }
+        Insert: {
+          id?: number
+          name: string
+          unit?: string
+          stock_quantity?: number
+          low_stock_threshold?: number
+          supplier_name?: string | null
+          created_at?: string | null
+        }
+        Update: {
+          id?: number
+          name?: string
+          unit?: string
+          stock_quantity?: number
+          low_stock_threshold?: number
+          supplier_name?: string | null
+          created_at?: string | null
+        }
+      }
+      supply_purchases: {
+        Row: {
+          id: number
+          supply_id: number
+          supplier_name: string | null
+          quantity: number
+          purchase_unit: string
+          base_units_per_purchase_unit: number
+          converted_quantity: number
+          unit_cost: number
+          total_cost: number
+          notes: string | null
+          purchased_at: string | null
+        }
+        Insert: {
+          id?: number
+          supply_id: number
+          supplier_name?: string | null
+          quantity: number
+          purchase_unit?: string
+          base_units_per_purchase_unit?: number
+          converted_quantity?: number
+          unit_cost: number
+          total_cost: number
+          notes?: string | null
+          purchased_at?: string | null
+        }
+        Update: {
+          id?: number
+          supply_id?: number
+          supplier_name?: string | null
+          quantity?: number
+          purchase_unit?: string
+          base_units_per_purchase_unit?: number
+          converted_quantity?: number
+          unit_cost?: number
+          total_cost?: number
+          notes?: string | null
+          purchased_at?: string | null
+        }
+      }
+      menu_item_recipes: {
+        Row: {
+          id: number
+          menu_item_id: number
+          supply_id: number
+          quantity_required: number
+        }
+        Insert: {
+          id?: number
+          menu_item_id: number
+          supply_id: number
+          quantity_required: number
+        }
+        Update: {
+          id?: number
+          menu_item_id?: number
+          supply_id?: number
+          quantity_required?: number
+        }
+      }
     }
     Views: {
       [_ in never]: never

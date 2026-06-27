@@ -7,6 +7,7 @@ import Home from "@/pages/home";
 import Receipt from "@/pages/receipt";
 import Admin from "@/pages/admin";
 import Inventory from "@/pages/inventory";
+import Supplies from "@/pages/supplies";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -16,6 +17,7 @@ function Router() {
       <Route path="/receipt" component={Receipt} />
       <Route path="/admin" component={Admin} />
       <Route path="/inventory" component={Inventory} />
+      <Route path="/supplies" component={Supplies} />
       <Route component={NotFound} />
     </Switch>
   );
