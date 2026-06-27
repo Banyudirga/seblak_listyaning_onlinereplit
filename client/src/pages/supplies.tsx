@@ -676,12 +676,14 @@ function RecordPurchaseDialog({
               Estimated total: <span className="font-semibold">{formatRupiah(quantity * unitCost)}</span>
             </div>
             {selectedSupply && (
-              <div className="mt-1 text-muted-foreground">
-                Stock increase: <span className="font-semibold text-foreground">{Math.max(quantity, 0) * Math.max(baseUnitsPerPurchaseUnit, 0)} {selectedSupply.unit}</span>
-              </div>
-              <div className="mt-1 text-muted-foreground">
-                Stock after purchase: <span className="font-semibold text-foreground">{selectedSupply.stockQuantity + Math.max(quantity, 0) * Math.max(baseUnitsPerPurchaseUnit, 0)} {selectedSupply.unit}</span>
-              </div>
+              <>
+                <div className="mt-1 text-muted-foreground">
+                  Stock increase: <span className="font-semibold text-foreground">{Math.max(quantity, 0) * Math.max(baseUnitsPerPurchaseUnit, 0)} {selectedSupply.unit}</span>
+                </div>
+                <div className="mt-1 text-muted-foreground">
+                  Stock after purchase: <span className="font-semibold text-foreground">{selectedSupply.stockQuantity + Math.max(quantity, 0) * Math.max(baseUnitsPerPurchaseUnit, 0)} {selectedSupply.unit}</span>
+                </div>
+              </>
             )}
           </div>
           {formError && <p className="text-sm text-destructive">{formError}</p>}
