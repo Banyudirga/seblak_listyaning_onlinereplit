@@ -209,6 +209,15 @@ const getAllSupplyPurchases = async (_req: Request, res: Response) => {
   }
 };
 
+const getStockMovements = async (_req: Request, res: Response) => {
+  try {
+    const movements = await storage.getSupplyStockMovements();
+    res.json(movements);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch stock movements" });
+  }
+};
+
 const createSupplyPurchase = async (req: Request, res: Response) => {
   try {
     const validatedPurchase = insertSupplyPurchaseSchema.parse(req.body);
@@ -279,6 +288,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/admin/supplies", createSupply);
   app.get("/api/admin/supply-purchases", getAllSupplyPurchases);
   app.post("/api/admin/supply-purchases", createSupplyPurchase);
+  app.get("/api/admin/stock-movements", getStockMovements);
   app.get("/api/admin/recipes/summary", getRecipeCoverageSummaries);
   app.get("/api/admin/menu-items/:menuItemId/recipes", getMenuItemRecipes);
   app.put("/api/admin/menu-items/:menuItemId/recipes", replaceMenuItemRecipes);

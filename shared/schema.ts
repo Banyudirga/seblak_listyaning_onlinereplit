@@ -63,6 +63,18 @@ export const menuItemRecipes = pgTable("menu_item_recipes", {
   quantityRequired: integer("quantity_required").notNull(),
 });
 
+export const stockMovements = pgTable("stock_movements", {
+  id: serial("id").primaryKey(),
+  supplyId: integer("supply_id").notNull(),
+  movementType: text("movement_type").notNull(),
+  quantityChange: integer("quantity_change").notNull(),
+  unit: text("unit").notNull(),
+  referenceType: text("reference_type").notNull(),
+  referenceId: integer("reference_id"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 const baseSupplyUnitSchema = z.enum(["pcs", "gram", "ml"]);
 
 export const insertMenuItemSchema = createInsertSchema(menuItems).omit({ id: true });
@@ -83,6 +95,7 @@ export const insertSupplyPurchaseSchema = createInsertSchema(supplyPurchases)
     unitCost: z.number().int().min(0),
   });
 export const insertMenuItemRecipeSchema = createInsertSchema(menuItemRecipes).omit({ id: true });
+export const insertSupplyStockMovementSchema = createInsertSchema(stockMovements).omit({ id: true, createdAt: true });
 
 export type InsertMenuItem = z.infer<typeof insertMenuItemSchema>;
 export type MenuItem = typeof menuItems.$inferSelect;
@@ -94,6 +107,8 @@ export type InsertSupplyPurchase = z.infer<typeof insertSupplyPurchaseSchema>;
 export type SupplyPurchase = typeof supplyPurchases.$inferSelect;
 export type InsertMenuItemRecipe = z.infer<typeof insertMenuItemRecipeSchema>;
 export type MenuItemRecipe = typeof menuItemRecipes.$inferSelect;
+export type InsertSupplyStockMovement = z.infer<typeof insertSupplyStockMovementSchema>;
+export type SupplyStockMovement = typeof stockMovements.$inferSelect;
 
 export interface CartItem {
   id: string;

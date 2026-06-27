@@ -1,7 +1,7 @@
 // Import environment variables first
 import './env';
 
-import { type MenuItem, type Order, type InsertOrder, type InsertMenuItem, type Supply, type InsertSupply, type SupplyPurchase, type InsertSupplyPurchase, type MenuItemRecipe, type InsertMenuItemRecipe } from "@shared/schema";
+import { type MenuItem, type Order, type InsertOrder, type InsertMenuItem, type Supply, type InsertSupply, type SupplyPurchase, type InsertSupplyPurchase, type MenuItemRecipe, type InsertMenuItemRecipe, type SupplyStockMovement, type InsertSupplyStockMovement } from "@shared/schema";
 import { defaultMenuItems } from "./mock-data";
 
 export interface RecipeCoverageSummary {
@@ -19,6 +19,7 @@ export interface IStorage {
   createSupply(supply: InsertSupply): Promise<Supply>;
   createSupplyPurchase(purchase: InsertSupplyPurchase): Promise<SupplyPurchase>;
   getAllSupplyPurchases(): Promise<SupplyPurchase[]>;
+  getSupplyStockMovements(): Promise<SupplyStockMovement[]>;
   getRecipesByMenuItem(menuItemId: number): Promise<MenuItemRecipe[]>;
   getRecipeCoverageSummaries(): Promise<RecipeCoverageSummary[]>;
   replaceMenuItemRecipe(menuItemId: number, recipes: InsertMenuItemRecipe[]): Promise<MenuItemRecipe[]>;
@@ -33,11 +34,13 @@ export class MemStorage implements IStorage {
   private orders: Map<number, Order>;
   private supplies: Map<number, Supply>;
   private supplyPurchases: Map<number, SupplyPurchase>;
+  private stockMovements: Map<number, SupplyStockMovement>;
   private recipes: Map<number, MenuItemRecipe>;
   private currentMenuId: number;
   private currentOrderId: number;
   private currentSupplyId: number;
   private currentSupplyPurchaseId: number;
+  private currentStockMovementId: number;
   private currentRecipeId: number;
 
   constructor() {
@@ -45,11 +48,13 @@ export class MemStorage implements IStorage {
     this.orders = new Map();
     this.supplies = new Map();
     this.supplyPurchases = new Map();
+    this.stockMovements = new Map();
     this.recipes = new Map();
     this.currentMenuId = 1;
     this.currentOrderId = 1;
     this.currentSupplyId = 1;
     this.currentSupplyPurchaseId = 1;
+    this.currentStockMovementId = 1;
     this.currentRecipeId = 1;
     this.initializeMenuItems();
   }
@@ -133,11 +138,22 @@ export class MemStorage implements IStorage {
       purchasedAt: new Date(),
     };
     this.supplyPurchases.set(newPurchase.id, newPurchase);
+    this.recordStockMovement({ supplyId: supply.id, movementType: "purchase", quantityChange: convertedQuantity, unit: supply.unit, referenceType: "purchase", referenceId: newPurchase.id, notes: newPurchase.notes ?? `Purchase recorded for ${supply.name}` });
     return newPurchase;
   }
 
   async getAllSupplyPurchases(): Promise<SupplyPurchase[]> {
     return Array.from(this.supplyPurchases.values());
+  }
+
+  private recordStockMovement(movement: InsertSupplyStockMovement): SupplyStockMovement {
+    const created = { ...movement, id: this.currentStockMovementId++, referenceId: movement.referenceId ?? null, notes: movement.notes ?? null, createdAt: new Date() };
+    this.stockMovements.set(created.id, created);
+    return created;
+  }
+
+  async getSupplyStockMovements(): Promise<SupplyStockMovement[]> {
+    return Array.from(this.stockMovements.values()).sort((a, b) => (b.createdAt?.getTime?.() ?? 0) - (a.createdAt?.getTime?.() ?? 0));
   }
 
   async getRecipesByMenuItem(menuItemId: number): Promise<MenuItemRecipe[]> {
@@ -214,6 +230,7 @@ export class MemStorage implements IStorage {
         if (supply.stockQuantity < required) throw new Error(`Not enough stock for ${supply.name}`);
         supply.stockQuantity -= required;
         this.supplies.set(supply.id, supply);
+        this.recordStockMovement({ supplyId: supply.id, movementType: "usage", quantityChange: -required, unit: supply.unit, referenceType: "order", referenceId: order.id, notes: item.name ? `${item.name} x${item.quantity}` : `Order #${order.id}` });
       }
     }
   }

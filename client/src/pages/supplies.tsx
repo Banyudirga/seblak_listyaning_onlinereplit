@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
-import { ArrowLeft, BookOpen, PlusCircle, RefreshCw, ShoppingCart, Warehouse } from "lucide-react";
+import { Activity, AlertTriangle, ArrowLeft, BookOpen, PlusCircle, RefreshCw, ShoppingCart, Warehouse } from "lucide-react";
 
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { formatRupiah } from "@/lib/format";
@@ -16,7 +16,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
-import type { MenuItem, MenuItemRecipe, Supply, SupplyPurchase } from "@shared/schema";
+import type { MenuItem, MenuItemRecipe, Supply, SupplyPurchase, SupplyStockMovement } from "@shared/schema";
 
 type RecipeCoverageSummary = {
   menuItemId: number;
@@ -79,6 +79,10 @@ export default function SuppliesPage() {
     queryKey: ["/api/admin/recipes/summary"],
   });
 
+  const { data: stockMovements = [] } = useQuery<SupplyStockMovement[]>({
+    queryKey: ["/api/admin/stock-movements"],
+  });
+
   const { data: recipes = [], isLoading: recipesLoading } = useQuery<MenuItemRecipe[]>({
     queryKey: [editingMenuItem ? `/api/admin/menu-items/${editingMenuItem.id}/recipes` : "/api/admin/menu-items/0/recipes"],
     enabled: !!editingMenuItem,
@@ -98,6 +102,7 @@ export default function SuppliesPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/supplies"] }),
       queryClient.invalidateQueries({ queryKey: ["/api/admin/supply-purchases"] }),
       queryClient.invalidateQueries({ queryKey: ["/api/admin/inventory"] }),
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/stock-movements"] }),
     ]);
     toast({ title: "Refreshed", description: "Supply data has been refreshed." });
   };
@@ -141,6 +146,7 @@ export default function SuppliesPage() {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["/api/admin/supplies"] }),
         queryClient.invalidateQueries({ queryKey: ["/api/admin/supply-purchases"] }),
+        queryClient.invalidateQueries({ queryKey: ["/api/admin/stock-movements"] }),
       ]);
       setIsPurchaseOpen(false);
       toast({ title: "Purchase recorded", description: "Supply stock has been increased." });
@@ -292,6 +298,7 @@ export default function SuppliesPage() {
             <TabsTrigger value="supplies"><Warehouse className="h-4 w-4 mr-2" />Supplies</TabsTrigger>
             <TabsTrigger value="purchases"><ShoppingCart className="h-4 w-4 mr-2" />Purchases</TabsTrigger>
             <TabsTrigger value="recipes"><BookOpen className="h-4 w-4 mr-2" />Recipes</TabsTrigger>
+            <TabsTrigger value="reports"><Activity className="h-4 w-4 mr-2" />Reports</TabsTrigger>
           </TabsList>
 
           <TabsContent value="supplies">
@@ -395,6 +402,42 @@ export default function SuppliesPage() {
                 </Table>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="reports">
+            <div className="grid grid-cols-1 xl:grid-cols-[0.95fr_1.25fr] gap-6">
+              <Card>
+                <CardHeader><CardTitle className="flex items-center gap-2"><AlertTriangle className="h-4 w-4 text-yellow-600" />Low-Stock Alerts</CardTitle></CardHeader>
+                <CardContent className="space-y-3 text-sm">
+                  {lowStockSupplies.length === 0 ? <p className="text-muted-foreground">All supplies are above their alert threshold.</p> : lowStockSupplies.map((supply) => (
+                    <div key={supply.id} className="rounded-lg border p-3">
+                      <div className="font-medium">{supply.name}</div>
+                      <div className="text-muted-foreground">Current: {supply.stockQuantity} {supply.unit} · Alert at {supply.lowStockThreshold} {supply.unit}</div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader><CardTitle className="flex items-center gap-2"><Activity className="h-4 w-4 text-indonesian-red" />Usage History</CardTitle></CardHeader>
+                <CardContent>
+                  <Table>
+                    <TableHeader><TableRow><TableHead>Date</TableHead><TableHead>Supply</TableHead><TableHead>Type</TableHead><TableHead>Change</TableHead><TableHead>Reference</TableHead></TableRow></TableHeader>
+                    <TableBody>
+                      {stockMovements.map((movement) => (
+                        <TableRow key={movement.id}>
+                          <TableCell>{movement.createdAt ? new Date(movement.createdAt).toLocaleString("id-ID") : "-"}</TableCell>
+                          <TableCell className="font-medium">{supplyNameById[movement.supplyId] || `Supply #${movement.supplyId}`}</TableCell>
+                          <TableCell className="capitalize">{movement.movementType}</TableCell>
+                          <TableCell className={movement.quantityChange >= 0 ? "text-green-600 font-medium" : "text-red-600 font-medium"}>{movement.quantityChange > 0 ? `+${movement.quantityChange}` : movement.quantityChange} {movement.unit}</TableCell>
+                          <TableCell>{movement.referenceType}{movement.referenceId ? ` #${movement.referenceId}` : ""}</TableCell>
+                        </TableRow>
+                      ))}
+                      {stockMovements.length === 0 && <TableRow><TableCell colSpan={5} className="text-center text-gray-500 py-10">No stock movements yet. Purchases and sales will appear here.</TableCell></TableRow>}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           <TabsContent value="recipes">

@@ -1,4 +1,4 @@
-import { type MenuItem, type Order, type InsertOrder, type InsertMenuItem, type Supply, type InsertSupply, type SupplyPurchase, type InsertSupplyPurchase, type MenuItemRecipe, type InsertMenuItemRecipe } from "@shared/schema";
+import { type MenuItem, type Order, type InsertOrder, type InsertMenuItem, type Supply, type InsertSupply, type SupplyPurchase, type InsertSupplyPurchase, type MenuItemRecipe, type InsertMenuItemRecipe, type SupplyStockMovement } from "@shared/schema";
 import { supabase } from "./supabase";
 import { IStorage } from "./storage";
 import { defaultMenuItems } from "./mock-data";
@@ -26,6 +26,20 @@ export class SupabaseStorage implements IStorage {
       menuItemId: data.menu_item_id,
       supplyId: data.supply_id,
       quantityRequired: data.quantity_required
+    };
+  }
+
+  private mapStockMovement(data: any): SupplyStockMovement {
+    return {
+      id: data.id,
+      supplyId: data.supply_id,
+      movementType: data.movement_type,
+      quantityChange: data.quantity_change,
+      unit: data.unit,
+      referenceType: data.reference_type,
+      referenceId: data.reference_id,
+      notes: data.notes,
+      createdAt: new Date(data.created_at)
     };
   }
   
@@ -233,6 +247,18 @@ private async deductStockForOrder(order: Order): Promise<void> {
       .eq('id', supplyId);
 
     if (updateError) throw new Error(updateError.message || `Failed to deduct stock for ${supply.name}`);
+
+    const { error: movementError } = await supabase.from('stock_movements').insert({
+      supply_id: supplyId,
+      movement_type: 'usage',
+      quantity_change: -required,
+      unit: supply.unit,
+      reference_type: 'order',
+      reference_id: order.id,
+      notes: `Stock deducted for order #${order.id}`
+    });
+
+    if (movementError) throw new Error(movementError.message || `Failed to log usage for ${supply.name}`);
   }
 }
 
@@ -379,10 +405,24 @@ async updateOrderStatus(id: number, status: string): Promise<Order | undefined> 
 
     if (error) throw new Error(`Failed to create supply purchase: ${error.message}`);
 
-    await supabase
+    const { error: supplyUpdateError } = await supabase
       .from('supplies')
       .update({ stock_quantity: supply.stock_quantity + convertedQuantity })
       .eq('id', purchase.supplyId);
+
+    if (supplyUpdateError) throw new Error(`Failed to update supply stock: ${supplyUpdateError.message}`);
+
+    const { error: movementError } = await supabase.from('stock_movements').insert({
+      supply_id: purchase.supplyId,
+      movement_type: 'purchase',
+      quantity_change: convertedQuantity,
+      unit: supply.unit,
+      reference_type: 'purchase',
+      reference_id: data.id,
+      notes: purchase.notes ?? `Purchase recorded for ${supply.name}`
+    });
+
+    if (movementError) throw new Error(`Failed to log stock movement: ${movementError.message}`);
 
     return {
       id: data.id,
@@ -415,6 +455,12 @@ async updateOrderStatus(id: number, status: string): Promise<Order | undefined> 
       notes: item.notes,
       purchasedAt: new Date(item.purchased_at)
     }));
+  }
+
+  async getSupplyStockMovements(): Promise<SupplyStockMovement[]> {
+    const { data, error } = await supabase.from('stock_movements').select('*').order('created_at', { ascending: false }).limit(100);
+    if (error || !data) return [];
+    return data.map((item) => this.mapStockMovement(item));
   }
 
   async getRecipesByMenuItem(menuItemId: number): Promise<MenuItemRecipe[]> {
