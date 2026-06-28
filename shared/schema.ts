@@ -35,6 +35,7 @@ export const orders = pgTable("orders", {
 export const supplies = pgTable("supplies", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
+  imageUrl: text("image_url"),
   unit: text("unit").notNull().default("pcs"),
   stockQuantity: integer("stock_quantity").notNull().default(0),
   lowStockThreshold: integer("low_stock_threshold").notNull().default(0),
@@ -83,6 +84,7 @@ export const insertSupplySchema = createInsertSchema(supplies)
   .omit({ id: true, createdAt: true })
   .extend({
     unit: baseSupplyUnitSchema,
+    imageUrl: z.string().url().optional().nullable().or(z.literal("")).transform((value) => value || undefined),
     stockQuantity: z.number().int().min(0),
     lowStockThreshold: z.number().int().min(0),
   });

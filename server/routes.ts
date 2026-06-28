@@ -195,7 +195,7 @@ const createSupply = async (req: Request, res: Response) => {
     if (error instanceof z.ZodError) {
       res.status(400).json({ message: "Invalid supply data", errors: error.errors });
     } else {
-      res.status(500).json({ message: "Failed to create supply" });
+      res.status(500).json({ message: error instanceof Error ? error.message : "Failed to create supply" });
     }
   }
 };

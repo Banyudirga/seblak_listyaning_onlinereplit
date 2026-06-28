@@ -103,6 +103,7 @@ export class MemStorage implements IStorage {
     const newSupply: Supply = {
       id: this.currentSupplyId++,
       name: supply.name,
+      imageUrl: supply.imageUrl ?? null,
       unit: supply.unit ?? "pcs",
       stockQuantity: supply.stockQuantity ?? 0,
       lowStockThreshold: supply.lowStockThreshold ?? 0,
