@@ -1,17 +1,16 @@
+import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { zodResolver } from "@hookform/resolvers/zod";
+import type { MenuItem } from "@shared/schema";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import type { MenuItem } from "@shared/schema";
-import { Image } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Textarea } from "@/components/ui/textarea";
 
 const addMenuSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -62,6 +61,8 @@ export default function AddMenuDialog({ isOpen, onClose, onSubmit, isSubmitting 
       isAvailable: 1,
     },
   });
+  const imageValue = form.watch("image");
+  const selectedFileName = imageValue instanceof File ? imageValue.name : "Belum ada file dipilih";
 
   useEffect(() => {
     if (isOpen) {
@@ -70,15 +71,34 @@ export default function AddMenuDialog({ isOpen, onClose, onSubmit, isSubmitting 
     }
   }, [isOpen, form]);
 
+  useEffect(() => {
+    if (imageValue instanceof File) {
+      const objectUrl = URL.createObjectURL(imageValue);
+      setImagePreview(objectUrl);
+      return () => URL.revokeObjectURL(objectUrl);
+    }
+
+    if (typeof imageValue === "string") {
+      setImagePreview(imageValue.trim() || null);
+      return;
+    }
+
+    setImagePreview(null);
+  }, [imageValue]);
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+      <DialogContent
+        className="top-4 flex max-h-[calc(100dvh-1rem)] w-[calc(100vw-1rem)] max-w-2xl translate-y-0 flex-col gap-0 overflow-hidden p-0 sm:top-[50%] sm:max-h-[90vh] sm:w-full sm:translate-y-[-50%]"
+        onInteractOutside={(event) => event.preventDefault()}
+      >
+        <DialogHeader className="shrink-0 border-b px-4 py-4 text-left sm:px-6">
           <DialogTitle>Add New Menu Item</DialogTitle>
         </DialogHeader>
         
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="flex min-h-0 flex-1 flex-col">
+            <div className="flex-1 space-y-4 overflow-y-auto px-4 py-4 sm:px-6">
             <FormField
               control={form.control}
               name="name"
@@ -168,41 +188,42 @@ export default function AddMenuDialog({ isOpen, onClose, onSubmit, isSubmitting 
               name="image"
               render={({ field: { value, onChange, ...fieldProps } }) => (
                 <FormItem>
-                  <FormLabel>Image</FormLabel>
+                  <FormLabel htmlFor="menu-image-file">Upload gambar atau isikan link gambar menu</FormLabel>
                   <FormControl>
-                    <div className="flex flex-col gap-2">
-                      <Input 
-                        type="file" 
+                    <div className="space-y-2">
+                      <Input
+                        id="menu-image-file"
+                        type="file"
                         accept="image/*"
-                        className="cursor-pointer"
+                        className="sr-only"
                         onChange={(e) => {
                           const file = e.target.files?.[0];
                           if (file) {
                             onChange(file);
-                            // Create preview URL
-                            const reader = new FileReader();
-                            reader.onload = (event) => {
-                              setImagePreview(event.target?.result as string);
-                            };
-                            reader.readAsDataURL(file);
                           }
                         }}
                         {...fieldProps}
                       />
+                      <div className="flex items-stretch">
+                        <label
+                          htmlFor="menu-image-file"
+                          className="inline-flex h-10 shrink-0 cursor-pointer items-center justify-center rounded-l-md border border-r-0 border-input bg-background px-3 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
+                        >
+                          {value instanceof File ? "Ganti file" : "Pilih file"}
+                        </label>
+                        <Input
+                          id="menu-image-url"
+                          className="rounded-l-none"
+                          placeholder="https://contoh.com/gambar-menu.jpg"
+                          value={typeof value === "string" ? value : ""}
+                          onChange={(e) => onChange(e.target.value)}
+                        />
+                      </div>
+                      <p className="truncate text-xs text-muted-foreground">{selectedFileName}</p>
                       {imagePreview && (
-                        <div className="relative w-full h-32 mt-2 rounded-md overflow-hidden border border-input">
-                          <div 
-                            className="w-full h-full bg-cover bg-center"
-                            style={{ backgroundImage: `url(${imagePreview})` }}
-                          />
-                        </div>
-                      )}
-                      {!imagePreview && (
-                        <div className="flex items-center justify-center w-full h-32 mt-2 rounded-md border border-dashed border-input bg-muted/20">
-                          <div className="flex flex-col items-center text-muted-foreground">
-                            <Image className="w-8 h-8 mb-2" />
-                            <span>No image selected</span>
-                          </div>
+                        <div className="rounded-lg border bg-muted/30 p-3">
+                          <p className="mb-2 text-xs text-muted-foreground">Preview gambar</p>
+                          <img src={imagePreview} alt="Preview menu" className="h-32 w-full rounded-md bg-muted object-cover" />
                         </div>
                       )}
                     </div>
@@ -329,22 +350,25 @@ export default function AddMenuDialog({ isOpen, onClose, onSubmit, isSubmitting 
               )}
             />
             
-            <div className="flex gap-2 pt-4">
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={onClose}
-                className="flex-1"
-              >
-                Cancel
-              </Button>
-              <Button 
-                type="submit" 
-                disabled={isSubmitting}
-                className="flex-1"
-              >
-                Add Menu Item
-              </Button>
+            </div>
+            <div className="shrink-0 border-t bg-background/95 px-4 py-4 backdrop-blur sm:px-6">
+              <div className="flex flex-col-reverse gap-2 sm:flex-row">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={onClose}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="flex-1"
+                >
+                  Add Menu Item
+                </Button>
+              </div>
             </div>
           </form>
         </Form>

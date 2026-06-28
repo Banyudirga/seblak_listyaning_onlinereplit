@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { type FormEvent, useEffect, useState } from "react";
 
 import { formatRupiah } from "@/lib/format";
 import { PURCHASE_UNIT_OPTIONS, getSuggestedConversion, type PurchaseForm } from "@/components/supplies/supplies-types";
@@ -73,13 +73,23 @@ export function RecordPurchaseDialog({
             ? "Unit cost cannot be negative."
             : null;
 
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (isSubmitting || formError) return;
+    onSubmit(form);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent>
-        <DialogHeader>
+      <DialogContent
+        className="top-4 flex max-h-[calc(100dvh-1rem)] w-[calc(100vw-1rem)] max-w-xl translate-y-0 flex-col gap-0 overflow-hidden p-0 sm:top-[50%] sm:max-h-[90vh] sm:w-full sm:translate-y-[-50%]"
+        onInteractOutside={(event) => event.preventDefault()}
+      >
+        <DialogHeader className="shrink-0 border-b px-4 py-4 text-left sm:px-6">
           <DialogTitle>Record Purchase</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4">
+        <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
+          <div className="flex-1 space-y-4 overflow-y-auto px-4 py-4 sm:px-6">
           <p className="text-sm text-muted-foreground">
             Recording a purchase adds stock immediately for the selected supply.
           </p>
@@ -106,6 +116,7 @@ export function RecordPurchaseDialog({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input
               type="number"
+              inputMode="numeric"
               placeholder="How many units purchased"
               value={form.quantity}
               onChange={(e) => setForm({ ...form, quantity: e.target.value })}
@@ -127,12 +138,14 @@ export function RecordPurchaseDialog({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input
               type="number"
+              inputMode="numeric"
               placeholder={`How many ${selectedSupply?.unit ?? "base units"} in 1 ${form.purchaseUnit}`}
               value={form.baseUnitsPerPurchaseUnit}
               onChange={(e) => setForm({ ...form, baseUnitsPerPurchaseUnit: e.target.value })}
             />
             <Input
               type="number"
+              inputMode="numeric"
               placeholder="Unit cost"
               value={form.unitCost}
               onChange={(e) => setForm({ ...form, unitCost: e.target.value })}
@@ -175,16 +188,18 @@ export function RecordPurchaseDialog({
           </div>
 
           {formError && <p className="text-sm text-destructive">{formError}</p>}
-
-          <div className="flex gap-2">
-            <Button variant="outline" className="flex-1" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button className="flex-1" disabled={isSubmitting || !!formError} onClick={() => onSubmit(form)}>
-              Save Purchase
-            </Button>
           </div>
-        </div>
+          <div className="shrink-0 border-t bg-background/95 px-4 py-4 backdrop-blur sm:px-6">
+            <div className="flex flex-col-reverse gap-2 sm:flex-row">
+              <Button type="button" variant="outline" className="flex-1" onClick={onClose}>
+                Cancel
+              </Button>
+              <Button type="submit" className="flex-1" disabled={isSubmitting || !!formError}>
+                Save Purchase
+              </Button>
+            </div>
+          </div>
+        </form>
       </DialogContent>
     </Dialog>
   );

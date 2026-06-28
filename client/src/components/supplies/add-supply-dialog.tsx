@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { type FormEvent, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -58,6 +58,7 @@ export function AddSupplyDialog({
   const stockQuantity = Number(form.stockQuantity || 0);
   const imagePreviewUrl = localPreviewUrl || form.imageUrl.trim();
   const lowStockThreshold = Number(form.lowStockThreshold || 0);
+  const selectedFileName = form.imageFile?.name ?? "Belum ada file dipilih";
   const formError =
     !form.name.trim()
       ? "Nama barang harus diisi"
@@ -67,17 +68,23 @@ export function AddSupplyDialog({
           ? "Stock and threshold must be zero or greater."
           : null;
 
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (isSubmitting || formError) return;
+    onSubmit(form);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-xl">
-        <DialogHeader>
+      <DialogContent
+        className="top-4 flex max-h-[calc(100dvh-1rem)] w-[calc(100vw-1rem)] max-w-xl translate-y-0 flex-col gap-0 overflow-hidden p-0 sm:top-[50%] sm:max-h-[90vh] sm:w-full sm:translate-y-[-50%]"
+        onInteractOutside={(event) => event.preventDefault()}
+      >
+        <DialogHeader className="shrink-0 border-b px-4 py-4 text-left sm:px-6">
           <DialogTitle>Tambahkan barang</DialogTitle>
-          <DialogDescription>Upload gambar dari perangkat Anda atau isi link gambar bila sudah tersedia.</DialogDescription>
         </DialogHeader>
-        <div className="space-y-5">
-          <div className="rounded-lg bg-muted/60 p-3 text-sm text-muted-foreground">
-            Gunakan satuan stok terkecil untuk barang, misalnya `pcs`, `gram`, atau `ml`.
-          </div>
+        <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
+          <div className="flex-1 space-y-4 overflow-y-auto px-4 py-4 sm:px-6">
           <div className="space-y-2">
             <Label>Nama barang</Label>
             <Input
@@ -87,21 +94,30 @@ export function AddSupplyDialog({
             />
           </div>
           <div className="space-y-2">
-            <Label>Upload gambar barang</Label>
+            <Label htmlFor="supply-image-file">Upload gambar atau isikan link gambar barang</Label>
             <Input
+              id="supply-image-file"
+              className="sr-only"
               type="file"
               accept="image/*"
-              onChange={(e) => setForm({ ...form, imageFile: e.target.files?.[0] ?? null })}
+              onChange={(e) => setForm({ ...form, imageFile: e.target.files?.[0] ?? null, imageUrl: "" })}
             />
-            <p className="text-xs text-muted-foreground">Opsional. Pilih gambar dari perangkat Anda atau gunakan link di bawah.</p>
-          </div>
-          <div className="space-y-2">
-            <Label>Atau link gambar</Label>
-            <Input
-              placeholder="https://contoh.com/gambar-barang.jpg"
-              value={form.imageUrl}
-              onChange={(e) => setForm({ ...form, imageUrl: e.target.value, imageFile: null })}
-            />
+            <div className="flex items-stretch">
+              <label
+                htmlFor="supply-image-file"
+                className="inline-flex h-10 shrink-0 cursor-pointer items-center justify-center rounded-l-md border border-r-0 border-input bg-background px-3 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
+              >
+                {form.imageFile ? "Ganti file" : "Pilih file"}
+              </label>
+              <Input
+                id="supply-image-url"
+                className="rounded-l-none"
+                placeholder="https://contoh.com/gambar-barang.jpg"
+                value={form.imageUrl}
+                onChange={(e) => setForm({ ...form, imageUrl: e.target.value, imageFile: null })}
+              />
+            </div>
+            <p className="truncate text-xs text-muted-foreground">{selectedFileName}</p>
           </div>
           {imagePreviewUrl && (
             <div className="rounded-lg border bg-muted/30 p-3">
@@ -137,6 +153,7 @@ export function AddSupplyDialog({
               <Label>Stok awal</Label>
               <Input
                 type="number"
+                inputMode="numeric"
                 placeholder="Contoh: 100"
                 value={form.stockQuantity}
                 onChange={(e) => setForm({ ...form, stockQuantity: e.target.value })}
@@ -146,6 +163,7 @@ export function AddSupplyDialog({
               <Label>Batas stok minimum</Label>
               <Input
                 type="number"
+                inputMode="numeric"
                 placeholder="Contoh: 20"
                 value={form.lowStockThreshold}
                 onChange={(e) => setForm({ ...form, lowStockThreshold: e.target.value })}
@@ -156,16 +174,19 @@ export function AddSupplyDialog({
             Ringkasan: item ini mulai dengan <span className="font-semibold text-foreground">{stockQuantity}</span> {form.unit}
             {" "}dan akan diberi peringatan saat stok mencapai <span className="font-semibold text-foreground">{lowStockThreshold}</span> {form.unit}.
           </div>
-          {formError && <p className="text-sm text-destructive">{formError}</p>}
-          <div className="flex gap-2">
-            <Button variant="outline" className="flex-1" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button className="flex-1" disabled={isSubmitting || !!formError} onClick={() => onSubmit(form)}>
-              Save Supply
-            </Button>
           </div>
-        </div>
+          <div className="shrink-0 border-t bg-background/95 px-4 py-4 backdrop-blur sm:px-6">
+            {formError && <p className="mb-3 text-sm text-destructive">{formError}</p>}
+            <div className="flex flex-col-reverse gap-2 sm:flex-row">
+              <Button type="button" variant="outline" className="flex-1" onClick={onClose}>
+                Batal
+              </Button>
+              <Button type="submit" className="flex-1" disabled={isSubmitting || !!formError}>
+                {isSubmitting ? "Menyimpan..." : "Simpan barang"}
+              </Button>
+            </div>
+          </div>
+        </form>
       </DialogContent>
     </Dialog>
   );

@@ -57,14 +57,23 @@ export function RecipeEditorDialog({
           ? "Each ingredient needs a supply and a quantity greater than 0."
           : null;
 
+  const handleSubmit = () => {
+    if (isSubmitting || formError) return;
+    onSubmit(items);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
+      <DialogContent
+        className="top-4 flex max-h-[calc(100dvh-1rem)] w-[calc(100vw-1rem)] max-w-2xl translate-y-0 flex-col gap-0 overflow-hidden p-0 sm:top-[50%] sm:max-h-[90vh] sm:w-full sm:translate-y-[-50%]"
+        onInteractOutside={(event) => event.preventDefault()}
+      >
+        <DialogHeader className="shrink-0 border-b px-4 py-4 text-left sm:px-6">
           <DialogTitle>Recipe - {menuItem?.name}</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="flex min-h-0 flex-1 flex-col">
+          <div className="flex-1 space-y-4 overflow-y-auto px-4 py-4 sm:px-6">
           <p className="text-sm text-muted-foreground">
             Set how much of each supply is consumed every time this menu item is sold, using the supply base unit.
           </p>
@@ -89,6 +98,7 @@ export function RecipeEditorDialog({
 
                 <Input
                   type="number"
+                  inputMode="numeric"
                   placeholder={
                     supplies.find((supply) => String(supply.id) === item.supplyId)?.unit
                       ? `Qty per sale (${supplies.find((supply) => String(supply.id) === item.supplyId)?.unit})`
@@ -138,18 +148,21 @@ export function RecipeEditorDialog({
           </Button>
 
           {formError && <p className="text-sm text-destructive">{formError}</p>}
-
-          <div className="flex gap-2">
-            <Button variant="outline" className="flex-1" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button
-              className="flex-1"
-              disabled={isSubmitting || !!formError}
-              onClick={() => onSubmit(items)}
-            >
-              Save Recipe
-            </Button>
+          </div>
+          <div className="shrink-0 border-t bg-background/95 px-4 py-4 backdrop-blur sm:px-6">
+            <div className="flex flex-col-reverse gap-2 sm:flex-row">
+              <Button type="button" variant="outline" className="flex-1" onClick={onClose}>
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                className="flex-1"
+                disabled={isSubmitting || !!formError}
+                onClick={handleSubmit}
+              >
+                Save Recipe
+              </Button>
+            </div>
           </div>
         </div>
       </DialogContent>
