@@ -34,9 +34,9 @@ export default function ContactSection() {
                 <Phone className="h-8 w-8 text-white" />
               </div>
               <h3 className="text-xl font-bold text-dark-grey mb-2">Telepon</h3>
-              <p className="text-gray-600">+62-812-3456-7890</p>
+              <p className="text-gray-600">081533121536</p>
               <a 
-                href="tel:+6281234567890" 
+                href="tel:+6281533121536" 
                 className="text-indonesian-red font-medium hover:underline"
               >
                 Hubungi Sekarang
