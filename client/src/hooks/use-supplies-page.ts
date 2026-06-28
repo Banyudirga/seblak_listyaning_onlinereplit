@@ -79,16 +79,40 @@ export function useSuppliesPage({
     });
   };
 
+  const uploadSupplyImage = async (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await fetch("/api/admin/uploads/supply-image", {
+      method: "POST",
+      body: formData,
+      credentials: "include",
+    });
+
+    if (!res.ok) {
+      const text = (await res.text()) || res.statusText;
+      throw new Error(`${res.status}: ${text}`);
+    }
+
+    const data = (await res.json()) as { imageUrl: string };
+    return data.imageUrl;
+  };
+
   const addSupplyMutation = useMutation({
-    mutationFn: async (form: SupplyForm) =>
-      apiRequest("POST", "/api/admin/supplies", {
+    mutationFn: async (form: SupplyForm) => {
+      const imageUrl = form.imageFile
+        ? await uploadSupplyImage(form.imageFile)
+        : form.imageUrl.trim() || undefined;
+
+      return apiRequest("POST", "/api/admin/supplies", {
         name: form.name,
-        imageUrl: form.imageUrl.trim() || undefined,
+        imageUrl,
         unit: form.unit,
         stockQuantity: Number(form.stockQuantity),
         lowStockThreshold: Number(form.lowStockThreshold),
         supplierName: form.supplierName || null,
-      }),
+      });
+    },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["/api/admin/supplies"] });
       onAddSupplySuccess();

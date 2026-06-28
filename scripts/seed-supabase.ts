@@ -9,15 +9,15 @@ dotenv.config({ path: '../.env' });
 
 // Initialize Supabase client
 const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_KEY;
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-if (!supabaseUrl || !supabaseKey) {
-  console.error('Error: SUPABASE_URL and SUPABASE_KEY environment variables must be set.');
+if (!supabaseUrl || !supabaseServiceRoleKey) {
+  console.error('Error: SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY environment variables must be set.');
   console.error('Please check your .env file or environment variables.');
   process.exit(1);
 }
 
-const supabase = createClient<Database>(supabaseUrl, supabaseKey);
+const supabase = createClient<Database>(supabaseUrl, supabaseServiceRoleKey);
 
 async function seedDatabase() {
   console.log('Starting database seeding...');

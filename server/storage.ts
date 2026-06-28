@@ -282,13 +282,13 @@ export const getStorage = (): IStorage => {
     return storageInstance;
   }
 
-  // Use SupabaseStorage if SUPABASE_URL and SUPABASE_KEY are provided, otherwise fallback to MemStorage
-  const useSupabase = process.env.SUPABASE_URL && process.env.SUPABASE_KEY;
+  // Use SupabaseStorage if SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are provided, otherwise fallback to MemStorage
+  const useSupabase = process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   // Log which storage implementation is being used
   console.log('Environment variables when initializing storage:', {
     SUPABASE_URL: process.env.SUPABASE_URL,
-    SUPABASE_KEY: process.env.SUPABASE_KEY ? '[REDACTED]' : undefined,
+    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY ? '[REDACTED]' : undefined,
     useSupabase
   });
 

@@ -6,6 +6,7 @@ export type RecipeCoverageSummary = {
 export type SupplyForm = {
   name: string;
   imageUrl: string;
+  imageFile: File | null;
   unit: string;
   stockQuantity: string;
   lowStockThreshold: string;

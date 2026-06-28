@@ -1,8 +1,18 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
+import multer from "multer";
+import { nanoid } from "nanoid";
 import { storage } from "./storage";
+import { supabase } from "./supabase";
 import { insertOrderSchema, insertMenuItemSchema, insertSupplySchema, insertSupplyPurchaseSchema, insertMenuItemRecipeSchema } from "@shared/schema";
 import { z } from "zod";
+
+const SUPPLY_IMAGE_BUCKET = "supply-images";
+const supplyImageUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => cb(null, file.mimetype.startsWith("image/")),
+});
 
 // --- Reusable Route Handlers ---
 
@@ -200,6 +210,26 @@ const createSupply = async (req: Request, res: Response) => {
   }
 };
 
+const uploadSupplyImage = async (req: Request, res: Response) => {
+  try {
+    if (!req.file) return res.status(400).json({ message: "Image file is required" });
+
+    const extension = req.file.originalname.split(".").pop()?.toLowerCase() || "jpg";
+    const filePath = `supplies/${Date.now()}-${nanoid(10)}.${extension}`;
+    const { error } = await supabase.storage.from(SUPPLY_IMAGE_BUCKET).upload(filePath, req.file.buffer, {
+      contentType: req.file.mimetype,
+      upsert: false,
+    });
+
+    if (error) return res.status(500).json({ message: `Failed to upload image: ${error.message}` });
+
+    const { data } = supabase.storage.from(SUPPLY_IMAGE_BUCKET).getPublicUrl(filePath);
+    res.status(201).json({ imageUrl: data.publicUrl, path: filePath });
+  } catch (error) {
+    res.status(500).json({ message: error instanceof Error ? error.message : "Failed to upload image" });
+  }
+};
+
 const getAllSupplyPurchases = async (_req: Request, res: Response) => {
   try {
     const purchases = await storage.getAllSupplyPurchases();
@@ -285,6 +315,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/admin/inventory/:id", updateMenuItemStock);
   app.patch("/api/admin/inventory/:id/availability", updateMenuItemAvailability);
   app.get("/api/admin/supplies", getAllSupplies);
+  app.post("/api/admin/uploads/supply-image", supplyImageUpload.single("file"), uploadSupplyImage);
   app.post("/api/admin/supplies", createSupply);
   app.get("/api/admin/supply-purchases", getAllSupplyPurchases);
   app.post("/api/admin/supply-purchases", createSupplyPurchase);

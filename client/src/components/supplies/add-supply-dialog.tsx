@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -23,17 +23,20 @@ export function AddSupplyDialog({
   const [form, setForm] = useState<SupplyForm>({
     name: "",
     imageUrl: "",
+    imageFile: null,
     unit: "pcs",
     stockQuantity: "",
     lowStockThreshold: "",
     supplierName: "",
   });
+  const [localPreviewUrl, setLocalPreviewUrl] = useState("");
 
   useEffect(() => {
     if (open) {
       setForm({
         name: "",
         imageUrl: "",
+        imageFile: null,
         unit: "pcs",
         stockQuantity: "",
         lowStockThreshold: "",
@@ -42,7 +45,18 @@ export function AddSupplyDialog({
     }
   }, [open]);
 
+  useEffect(() => {
+    if (!form.imageFile) {
+      setLocalPreviewUrl("");
+      return;
+    }
+    const objectUrl = URL.createObjectURL(form.imageFile);
+    setLocalPreviewUrl(objectUrl);
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [form.imageFile]);
+
   const stockQuantity = Number(form.stockQuantity || 0);
+  const imagePreviewUrl = localPreviewUrl || form.imageUrl.trim();
   const lowStockThreshold = Number(form.lowStockThreshold || 0);
   const formError =
     !form.name.trim()
@@ -58,6 +72,7 @@ export function AddSupplyDialog({
       <DialogContent className="sm:max-w-xl">
         <DialogHeader>
           <DialogTitle>Tambahkan barang</DialogTitle>
+          <DialogDescription>Upload gambar dari perangkat Anda atau isi link gambar bila sudah tersedia.</DialogDescription>
         </DialogHeader>
         <div className="space-y-5">
           <div className="rounded-lg bg-muted/60 p-3 text-sm text-muted-foreground">
@@ -72,18 +87,26 @@ export function AddSupplyDialog({
             />
           </div>
           <div className="space-y-2">
-            <Label>Gambar barang</Label>
+            <Label>Upload gambar barang</Label>
+            <Input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setForm({ ...form, imageFile: e.target.files?.[0] ?? null })}
+            />
+            <p className="text-xs text-muted-foreground">Opsional. Pilih gambar dari perangkat Anda atau gunakan link di bawah.</p>
+          </div>
+          <div className="space-y-2">
+            <Label>Atau link gambar</Label>
             <Input
               placeholder="https://contoh.com/gambar-barang.jpg"
               value={form.imageUrl}
-              onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
+              onChange={(e) => setForm({ ...form, imageUrl: e.target.value, imageFile: null })}
             />
-            <p className="text-xs text-muted-foreground">Opsional. Isi dengan link gambar barang jika ada.</p>
           </div>
-          {form.imageUrl && (
+          {imagePreviewUrl && (
             <div className="rounded-lg border bg-muted/30 p-3">
-              <p className="text-xs text-muted-foreground mb-2">Preview gambar</p>
-              <img src={form.imageUrl} alt={form.name || "Preview barang"} className="h-32 w-full rounded-md object-cover bg-muted" />
+              <p className="mb-2 text-xs text-muted-foreground">Preview gambar</p>
+              <img src={imagePreviewUrl} alt={form.name || "Preview barang"} className="h-32 w-full rounded-md bg-muted object-cover" />
             </div>
           )}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
