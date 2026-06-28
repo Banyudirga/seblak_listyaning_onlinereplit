@@ -15,8 +15,33 @@ console.log('Storage initialized after environment variables loaded');
 import { registerRoutes } from "./routes";
 
 const app = express();
+const allowedOrigins = (process.env.CORS_ORIGIN || "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
+
+if (process.env.NODE_ENV === 'production') {
+  app.use((req, res, next) => {
+    const origin = req.headers.origin;
+
+    if (origin && allowedOrigins.includes(origin)) {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+    }
+
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+
+    if (req.method === 'OPTIONS') {
+      return res.status(200).end();
+    }
+
+    next();
+  });
+}
 
 app.use((req, res, next) => {
   const start = Date.now();
@@ -68,34 +93,12 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // Add CORS middleware for production
-if (process.env.NODE_ENV === 'production') {
-  app.use((req, res, next) => {
-    // Replace with your Vercel domain
-    const allowedOrigins = ['https://your-vercel-domain.vercel.app'];
-    const origin = req.headers.origin;
-    
-    if (origin && allowedOrigins.includes(origin)) {
-      res.setHeader('Access-Control-Allow-Origin', origin);
-    }
-    
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-    
-    if (req.method === 'OPTIONS') {
-      return res.status(200).end();
-    }
-    
-    next();
-  });
-}
   // ALWAYS serve the app on the port specified in the environment variable PORT
   // Other ports are firewalled. Default to 5000 if not specified.
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
   const port = parseInt(process.env.PORT || '5000', 10);
-  server.listen(port, () => {
+  server.listen(port, '0.0.0.0', () => {
     log(`serving on port ${port}`);
   });
 })();

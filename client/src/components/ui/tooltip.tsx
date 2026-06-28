@@ -5,10 +5,6 @@ import * as TooltipPrimitive from "@radix-ui/react-tooltip"
 
 import { cn } from "@/lib/utils"
 
-// #region debug-point C:tooltip-module
-fetch("http://127.0.0.1:7777/event",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({sessionId:"tooltip-useref-null",runId:"pre-fix",hypothesisId:"C",location:"client/src/components/ui/tooltip.tsx:7",msg:"[DEBUG] tooltip module evaluated",data:{reactVersion:React.version,hasUseRef:typeof React.useRef==="function",providerType:typeof TooltipPrimitive.Provider,providerName:(TooltipPrimitive.Provider as {displayName?: string; name?: string} | undefined)?.displayName ?? (TooltipPrimitive.Provider as {name?: string} | undefined)?.name ?? null},ts:Date.now()})}).catch(()=>{});
-// #endregion
-
 const TooltipProvider = TooltipPrimitive.Provider
 
 const Tooltip = TooltipPrimitive.Root

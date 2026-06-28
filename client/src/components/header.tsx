@@ -20,7 +20,7 @@ export default function Header() {
           <div className="flex items-center space-x-4">
             <div className="hidden md:flex items-center space-x-2 text-dark-grey">
               <Phone className="h-4 w-4 text-fresh-green" />
-              <span className="text-sm">081533121536</span>
+              <span className="text-sm">+62-812-3456-7890</span>
             </div>
             <Button 
               onClick={openCart}

@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { apiRequest, getApiUrl, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { PurchaseForm, RecipeCoverageSummary, RecipeDraft, SupplyForm } from "@/components/supplies/supplies-types";
 import type { MenuItem, MenuItemRecipe, Supply, SupplyPurchase, SupplyStockMovement } from "@shared/schema";
@@ -83,7 +83,7 @@ export function useSuppliesPage({
     const formData = new FormData();
     formData.append("file", file);
 
-    const res = await fetch("/api/admin/uploads/supply-image", {
+    const res = await fetch(getApiUrl("/api/admin/uploads/supply-image"), {
       method: "POST",
       body: formData,
       credentials: "include",
