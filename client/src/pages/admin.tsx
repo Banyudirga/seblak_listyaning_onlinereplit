@@ -35,8 +35,8 @@ export default function Admin() {
       }
       
       toast({
-        title: "New Order Received!",
-        description: "You have a new order to process.",
+        title: "Pesanan baru masuk!",
+        description: "Ada pesanan baru yang perlu diproses.",
         variant: "default",
       });
       
@@ -61,15 +61,15 @@ export default function Admin() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/orders'] });
       toast({
-        title: "Status Updated",
-        description: "Order status has been updated successfully.",
+        title: "Status diperbarui",
+        description: "Status pesanan berhasil diperbarui.",
       });
     },
     onError: (error) => {
     console.error("Mutation error:", error);
     toast({
-      title: "Error",
-      description: `Failed to update status: ${error.message}`,
+      title: "Terjadi kesalahan",
+      description: `Gagal memperbarui status: ${error.message}`,
       variant: "destructive",
     });
   },
@@ -91,7 +91,7 @@ export default function Admin() {
       <div className="min-h-screen bg-light-grey flex items-center justify-center">
         <div className="text-center">
           <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4" />
-          <p>Loading orders...</p>
+          <p>Memuat pesanan...</p>
         </div>
       </div>
     );
@@ -120,7 +120,7 @@ export default function Admin() {
                   className="text-indonesian-red border-white hover:bg-white"
                 >
                   <Package className="h-4 w-4 mr-2" />
-                  Inventory
+                  Inventaris
                 </Button>
               </Link>
               <Link href="/supplies">
@@ -129,7 +129,7 @@ export default function Admin() {
                   className="text-indonesian-red border-white hover:bg-white"
                 >
                   <Warehouse className="h-4 w-4 mr-2" />
-                  Supplies
+                  Barang
                 </Button>
               </Link>
               <Button 
@@ -138,7 +138,7 @@ export default function Admin() {
                 className="text-indonesian-red border-white hover:bg-white"
               >
                 <RefreshCw className="h-4 w-4 mr-2" />
-                Refresh
+                Muat ulang
               </Button>
             </div>
           </div>
@@ -186,7 +186,7 @@ export default function Admin() {
         <div className="mb-6">
           <Select value={selectedStatus} onValueChange={setSelectedStatus}>
             <SelectTrigger className="w-48">
-              <SelectValue placeholder="Filter by status" />
+              <SelectValue placeholder="Filter status" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Semua Pesanan</SelectItem>

@@ -13,15 +13,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 
 const addMenuSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  description: z.string().min(1, "Description is required"),
-  price: z.number().min(1, "Price must be greater than 0"),
-  category: z.string().min(1, "Category is required"),
-  image: z.instanceof(File).or(z.string().min(1, "Image is required")),
+  name: z.string().min(1, "Nama menu wajib diisi"),
+  description: z.string().min(1, "Deskripsi wajib diisi"),
+  price: z.number().min(1, "Harga harus lebih dari 0"),
+  category: z.string().min(1, "Kategori wajib dipilih"),
+  image: z.instanceof(File).or(z.string().min(1, "Gambar wajib diisi")),
   spicyLevel: z.string().optional(),
-  stockQuantity: z.number().min(0, "Stock cannot be negative"),
-  lowStockThreshold: z.number().min(1, "Threshold must be at least 1"),
-  unit: z.string().min(1, "Unit is required"),
+  stockQuantity: z.number().min(0, "Stok tidak boleh negatif"),
+  lowStockThreshold: z.number().min(1, "Batas minimum harus minimal 1"),
+  unit: z.string().min(1, "Satuan wajib dipilih"),
   isAvailable: z.number().min(0).max(1),
 });
 
@@ -93,7 +93,7 @@ export default function AddMenuDialog({ isOpen, onClose, onSubmit, isSubmitting 
         onInteractOutside={(event) => event.preventDefault()}
       >
         <DialogHeader className="shrink-0 border-b px-4 py-4 text-left sm:px-6">
-          <DialogTitle>Add New Menu Item</DialogTitle>
+          <DialogTitle>Tambah menu baru</DialogTitle>
         </DialogHeader>
         
         <Form {...form}>
@@ -104,9 +104,9 @@ export default function AddMenuDialog({ isOpen, onClose, onSubmit, isSubmitting 
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel>Nama menu</FormLabel>
                   <FormControl>
-                    <Input placeholder="Menu item name" {...field} />
+                    <Input placeholder="Contoh: Seblak Komplit" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -118,9 +118,9 @@ export default function AddMenuDialog({ isOpen, onClose, onSubmit, isSubmitting 
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel>Deskripsi</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Menu item description" {...field} />
+                    <Textarea placeholder="Deskripsi singkat menu" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -132,11 +132,11 @@ export default function AddMenuDialog({ isOpen, onClose, onSubmit, isSubmitting 
               name="price"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Price (Rp)</FormLabel>
+                  <FormLabel>Harga (Rp)</FormLabel>
                   <FormControl>
                     <Input 
                       type="number" 
-                      placeholder="Price in Rupiah" 
+                      placeholder="Harga dalam rupiah" 
                       {...field}
                       onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
                     />
@@ -151,14 +151,14 @@ export default function AddMenuDialog({ isOpen, onClose, onSubmit, isSubmitting 
               name="category"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Category</FormLabel>
+                  <FormLabel>Kategori</FormLabel>
                   <Select 
                     onValueChange={field.onChange} 
                     defaultValue={field.value}
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a category" />
+                        <SelectValue placeholder="Pilih kategori" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -238,22 +238,22 @@ export default function AddMenuDialog({ isOpen, onClose, onSubmit, isSubmitting 
               name="spicyLevel"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Spicy Level</FormLabel>
+                  <FormLabel>Tingkat kepedasan</FormLabel>
                   <Select 
                     onValueChange={field.onChange} 
                     defaultValue={field.value}
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select spicy level" />
+                        <SelectValue placeholder="Pilih tingkat kepedasan" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="none">None</SelectItem>
-                      <SelectItem value="mild">Mild</SelectItem>
-                      <SelectItem value="medium">Medium</SelectItem>
-                      <SelectItem value="hot">Hot</SelectItem>
-                      <SelectItem value="extra-hot">Extra Hot</SelectItem>
+                      <SelectItem value="none">Tidak pedas</SelectItem>
+                      <SelectItem value="mild">Sedang</SelectItem>
+                      <SelectItem value="medium">Pedas</SelectItem>
+                      <SelectItem value="hot">Sangat pedas</SelectItem>
+                      <SelectItem value="extra-hot">Super pedas</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -267,7 +267,7 @@ export default function AddMenuDialog({ isOpen, onClose, onSubmit, isSubmitting 
                 name="stockQuantity"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Initial Stock</FormLabel>
+                    <FormLabel>Stok awal</FormLabel>
                     <FormControl>
                       <Input 
                         type="number" 
@@ -285,7 +285,7 @@ export default function AddMenuDialog({ isOpen, onClose, onSubmit, isSubmitting 
                 name="lowStockThreshold"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Low Stock Alert</FormLabel>
+                    <FormLabel>Batas stok minimum</FormLabel>
                     <FormControl>
                       <Input 
                         type="number" 
@@ -304,20 +304,20 @@ export default function AddMenuDialog({ isOpen, onClose, onSubmit, isSubmitting 
               name="unit"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Unit</FormLabel>
+                  <FormLabel>Satuan</FormLabel>
                   <Select 
                     onValueChange={field.onChange} 
                     defaultValue={field.value}
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a unit" />
+                        <SelectValue placeholder="Pilih satuan" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="porsi">Porsi</SelectItem>
                       <SelectItem value="gelas">Gelas</SelectItem>
-                      <SelectItem value="pcs">Pcs</SelectItem>
+                      <SelectItem value="pcs">pcs</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -330,19 +330,19 @@ export default function AddMenuDialog({ isOpen, onClose, onSubmit, isSubmitting 
               name="isAvailable"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Availability</FormLabel>
+                  <FormLabel>Ketersediaan</FormLabel>
                   <Select 
                     onValueChange={(value) => field.onChange(parseInt(value))} 
                     defaultValue={field.value.toString()}
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select availability" />
+                        <SelectValue placeholder="Pilih ketersediaan" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="1">Available</SelectItem>
-                      <SelectItem value="0">Not Available</SelectItem>
+                      <SelectItem value="1">Tersedia</SelectItem>
+                      <SelectItem value="0">Tidak tersedia</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -359,14 +359,14 @@ export default function AddMenuDialog({ isOpen, onClose, onSubmit, isSubmitting 
                   onClick={onClose}
                   className="flex-1"
                 >
-                  Cancel
+                  Batal
                 </Button>
                 <Button
                   type="submit"
                   disabled={isSubmitting}
                   className="flex-1"
                 >
-                  Add Menu Item
+                  Tambah menu
                 </Button>
               </div>
             </div>

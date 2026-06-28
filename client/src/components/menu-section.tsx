@@ -16,6 +16,9 @@ const categoryIcons = {
   "Dingin": Snowflake,
   "Cemilan": ChefHat,
   "Gurih": ChefHat,
+  "Sedang": Flame,
+  "Sangat pedas": Flame,
+  "Super pedas": Flame,
 };
 
 const categoryColors = {
@@ -26,6 +29,17 @@ const categoryColors = {
   "Dingin": "bg-green-500",
   "Cemilan": "bg-orange-500",
   "Gurih": "bg-yellow-500",
+  "Sedang": "bg-orange-500",
+  "Sangat pedas": "bg-red-600",
+  "Super pedas": "bg-red-700",
+};
+
+const spicyLevelLabels: Record<string, string> = {
+  none: "Tidak pedas",
+  mild: "Sedang",
+  medium: "Pedas",
+  hot: "Sangat pedas",
+  "extra-hot": "Super pedas",
 };
 
 export default function MenuSection() {
@@ -62,7 +76,7 @@ export default function MenuSection() {
     return (
       <section id="menu" className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">Loading menu...</div>
+          <div className="text-center">Memuat menu...</div>
         </div>
       </section>
     );
@@ -101,8 +115,9 @@ export default function MenuSection() {
         {/* Menu Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredItems.map((item) => {
-            const IconComponent = categoryIcons[item.spicyLevel as keyof typeof categoryIcons] || ChefHat;
-            const badgeColor = categoryColors[item.spicyLevel as keyof typeof categoryColors] || "bg-gray-500";
+            const spicyLabel = spicyLevelLabels[item.spicyLevel ?? ""] ?? item.spicyLevel ?? "Menu";
+            const IconComponent = categoryIcons[spicyLabel as keyof typeof categoryIcons] || ChefHat;
+            const badgeColor = categoryColors[spicyLabel as keyof typeof categoryColors] || "bg-gray-500";
             
             return (
               <Card key={item.id} className="overflow-hidden hover:shadow-xl transition-shadow">
@@ -114,7 +129,7 @@ export default function MenuSection() {
                   />
                   <Badge className={`absolute top-3 right-3 ${badgeColor} text-white`}>
                     <IconComponent className="h-3 w-3 mr-1" />
-                    {item.spicyLevel}
+                    {spicyLabel}
                   </Badge>
                 </div>
                 <CardContent className="p-6">

@@ -35,8 +35,8 @@ export default function Inventory() {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/inventory'] });
       queryClient.invalidateQueries({ queryKey: ['/api/menu'] });
       toast({
-        title: "Stock Updated",
-        description: "Item stock has been updated successfully.",
+        title: "Stok diperbarui",
+        description: "Stok menu berhasil diperbarui.",
       });
       setEditingItem(null);
     },
@@ -86,16 +86,16 @@ export default function Inventory() {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/inventory'] });
       queryClient.invalidateQueries({ queryKey: ['/api/menu'] });
       toast({
-        title: "Menu Item Added",
-        description: "New menu item has been added successfully.",
+        title: "Menu ditambahkan",
+        description: "Menu baru berhasil ditambahkan.",
       });
       setIsAddMenuOpen(false);
     },
     onError: (error) => {
       console.error("Error adding menu item:", error);
       toast({
-        title: "Error",
-        description: "Failed to add menu item. Please try again.",
+        title: "Terjadi kesalahan",
+        description: "Gagal menambahkan menu. Silakan coba lagi.",
         variant: "destructive",
       });
     },
@@ -113,8 +113,8 @@ export default function Inventory() {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/inventory'] });
       queryClient.invalidateQueries({ queryKey: ['/api/menu'] });
       toast({
-        title: "Availability Updated",
-        description: "Item availability has been updated.",
+        title: "Ketersediaan diperbarui",
+        description: "Ketersediaan menu berhasil diperbarui.",
       });
     },
   });
@@ -145,7 +145,7 @@ export default function Inventory() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-light-grey flex items-center justify-center">
-        <div className="text-center">Loading inventory...</div>
+        <div className="text-center">Memuat inventaris...</div>
       </div>
     );
   }
@@ -157,7 +157,7 @@ export default function Inventory() {
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-2xl font-bold">Inventory Management</h1>
+              <h1 className="text-2xl font-bold">Manajemen inventaris</h1>
               <p className="text-red-100">Kelola Stok Menu</p>
               <Link href="/admin" className="inline-block mt-1">
                 <Button variant="outline" size="sm" className="text-indonesian-red border-white hover:bg-white text-xs py-1 h-auto">
@@ -173,7 +173,7 @@ export default function Inventory() {
                 className="text-indonesian-red border-white hover:bg-white"
               >
                 <PlusCircle className="h-4 w-4 mr-2" />
-                Add Menu
+                Tambah menu
               </Button>
               <Button 
                 onClick={() => refetch()}
@@ -181,7 +181,7 @@ export default function Inventory() {
                 className="text-indonesian-red border-white hover:bg-white"
               >
                 <Package className="h-4 w-4 mr-2" />
-                Refresh
+                Muat ulang
               </Button>
             </div>
           </div>
@@ -193,7 +193,7 @@ export default function Inventory() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium">Total Items</CardTitle>
+              <CardTitle className="text-sm font-medium">Total menu</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-indonesian-red">{inventoryStats.total}</div>
@@ -201,7 +201,7 @@ export default function Inventory() {
           </Card>
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium">Available</CardTitle>
+              <CardTitle className="text-sm font-medium">Tersedia</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-green-600">{inventoryStats.available}</div>
@@ -211,7 +211,7 @@ export default function Inventory() {
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium flex items-center">
                 <AlertTriangle className="h-4 w-4 mr-1" />
-                Low Stock
+                Stok menipis
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -220,7 +220,7 @@ export default function Inventory() {
           </Card>
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium">Out of Stock</CardTitle>
+              <CardTitle className="text-sm font-medium">Stok habis</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-red-600">{inventoryStats.outOfStock}</div>
@@ -232,10 +232,10 @@ export default function Inventory() {
         <div className="mb-6 flex gap-4 items-center">
           <Select value={selectedCategory} onValueChange={setSelectedCategory}>
             <SelectTrigger className="w-48">
-              <SelectValue placeholder="Filter by category" />
+              <SelectValue placeholder="Filter kategori" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Categories</SelectItem>
+              <SelectItem value="all">Semua kategori</SelectItem>
               {/* Predefined categories */}
               <SelectItem value="seblak">Seblak</SelectItem>
               <SelectItem value="prasmanan">Seblak Prasmanan</SelectItem>
@@ -256,7 +256,7 @@ export default function Inventory() {
           {inventoryStats.lowStock > 0 && (
             <div className="flex items-center text-yellow-600 bg-yellow-50 px-3 py-2 rounded-md border border-yellow-200">
               <AlertCircle className="h-4 w-4 mr-2" />
-              <span className="text-sm font-medium">{inventoryStats.lowStock} items need restocking</span>
+              <span className="text-sm font-medium">{inventoryStats.lowStock} menu perlu restok</span>
             </div>
           )}
         </div>

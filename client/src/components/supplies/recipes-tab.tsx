@@ -22,18 +22,18 @@ export function RecipesTab({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Menu Recipes</CardTitle>
+        <CardTitle>Resep menu</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
           <Input
             value={recipeSearch}
             onChange={(e) => onRecipeSearchChange(e.target.value)}
-            placeholder="Search menu items by name or category"
+            placeholder="Cari menu berdasarkan nama atau kategori"
             className="md:max-w-sm"
           />
           <p className="text-sm text-muted-foreground">
-            Recipes tell the app which supplies should be deducted after a sale.
+            Resep memberi tahu aplikasi barang mana yang harus dikurangi setelah penjualan.
           </p>
         </div>
 
@@ -51,11 +51,11 @@ export function RecipesTab({
                       <p className="text-sm text-gray-500 capitalize">{item.category}</p>
                     </div>
                     <Badge className={hasRecipe ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"}>
-                      {hasRecipe ? `${ingredientCount} ingredients` : "Recipe missing"}
+                      {hasRecipe ? `${ingredientCount} bahan` : "Resep belum ada"}
                     </Badge>
                   </div>
                   <Button size="sm" variant="outline" onClick={() => onEditRecipe(item)}>
-                    {hasRecipe ? "Edit Recipe" : "Set Recipe"}
+                    {hasRecipe ? "Ubah resep" : "Atur resep"}
                   </Button>
                 </CardContent>
               </Card>
@@ -64,7 +64,7 @@ export function RecipesTab({
 
           {filteredMenuItems.length === 0 && (
             <div className="col-span-full rounded-lg border border-dashed bg-background p-8 text-center text-sm text-muted-foreground">
-              No menu items match your search.
+              Tidak ada menu yang cocok dengan pencarian Anda.
             </div>
           )}
         </div>

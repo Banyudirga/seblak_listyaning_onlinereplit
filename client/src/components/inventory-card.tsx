@@ -44,12 +44,12 @@ export default function InventoryCard({ item, onEditStock, onToggleAvailability,
         
         <div className="space-y-3">
           <div className="flex justify-between items-center">
-            <span className="text-sm text-gray-600">Current Stock:</span>
+            <span className="text-sm text-gray-600">Stok saat ini:</span>
             <span className="font-bold">{item.stockQuantity} {item.unit}</span>
           </div>
           
           <div className="flex justify-between items-center">
-            <span className="text-sm text-gray-600">Low Stock Alert:</span>
+            <span className="text-sm text-gray-600">Batas stok minimum:</span>
             <span className="text-sm">{item.lowStockThreshold} {item.unit}</span>
           </div>
 
@@ -61,7 +61,7 @@ export default function InventoryCard({ item, onEditStock, onToggleAvailability,
               onClick={() => onEditStock(item)}
             >
               <Edit className="h-4 w-4 mr-1" />
-              Edit Stock
+              Ubah stok
             </Button>
             
             <Button
@@ -70,7 +70,7 @@ export default function InventoryCard({ item, onEditStock, onToggleAvailability,
               onClick={() => onToggleAvailability(item)}
               disabled={isTogglingAvailability}
             >
-              {item.isAvailable ? "Disable" : "Enable"}
+              {item.isAvailable ? "Nonaktifkan" : "Aktifkan"}
             </Button>
           </div>
         </div>

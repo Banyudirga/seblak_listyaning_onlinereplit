@@ -17,21 +17,21 @@ export function PurchasesTab({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Purchase History</CardTitle>
+        <CardTitle>Riwayat pembelian</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-sm text-muted-foreground">
-          Purchases are shown newest first and increase supply stock as soon as they are recorded.
+          Pembelian ditampilkan dari yang terbaru dan langsung menambah stok barang saat dicatat.
         </p>
 
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Date</TableHead>
-              <TableHead>Supply</TableHead>
+              <TableHead>Tanggal</TableHead>
+              <TableHead>Barang</TableHead>
               <TableHead>Supplier</TableHead>
-              <TableHead>Quantity</TableHead>
-              <TableHead>Unit Cost</TableHead>
+              <TableHead>Jumlah</TableHead>
+              <TableHead>Harga per unit</TableHead>
               <TableHead>Total</TableHead>
             </TableRow>
           </TableHeader>
@@ -39,12 +39,12 @@ export function PurchasesTab({
             {purchases.map((purchase) => (
               <TableRow key={purchase.id}>
                 <TableCell>{purchase.purchasedAt ? new Date(purchase.purchasedAt).toLocaleDateString("id-ID") : "-"}</TableCell>
-                <TableCell className="font-medium">{supplyNameById[purchase.supplyId] || `Supply #${purchase.supplyId}`}</TableCell>
+                <TableCell className="font-medium">{supplyNameById[purchase.supplyId] || `Barang #${purchase.supplyId}`}</TableCell>
                 <TableCell>{purchase.supplierName || "-"}</TableCell>
                 <TableCell>
                   <div className="font-medium">{purchase.quantity} {purchase.purchaseUnit}</div>
                   <div className="text-xs text-muted-foreground">
-                    Adds {purchase.convertedQuantity} {supplyById[purchase.supplyId]?.unit ?? "base units"}
+                    Menambah {purchase.convertedQuantity} {supplyById[purchase.supplyId]?.unit ?? "satuan dasar"}
                   </div>
                 </TableCell>
                 <TableCell>{formatRupiah(purchase.unitCost)}</TableCell>
@@ -54,7 +54,7 @@ export function PurchasesTab({
             {purchases.length === 0 && (
               <TableRow>
                 <TableCell colSpan={6} className="text-center text-gray-500 py-10">
-                  No purchases recorded yet. Use "Record Purchase" to add incoming stock.
+                  Belum ada pembelian tercatat. Gunakan "Catat pembelian" untuk menambah stok masuk.
                 </TableCell>
               </TableRow>
             )}

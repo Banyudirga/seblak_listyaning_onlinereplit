@@ -57,7 +57,7 @@ export default function SuppliesPage() {
       <div className="min-h-screen bg-light-grey flex items-center justify-center">
         <div className="text-center">
           <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4" />
-          <p>Loading supplies...</p>
+          <p>Memuat data barang...</p>
         </div>
       </div>
     );
@@ -82,10 +82,10 @@ export default function SuppliesPage() {
         />
         <Tabs defaultValue="supplies">
           <TabsList className="mb-6 h-auto flex-wrap justify-start gap-1 bg-transparent p-0">
-            <TabsTrigger value="supplies"><Warehouse className="h-4 w-4 mr-2" />Supplies</TabsTrigger>
-            <TabsTrigger value="purchases"><ShoppingCart className="h-4 w-4 mr-2" />Purchases</TabsTrigger>
-            <TabsTrigger value="recipes"><BookOpen className="h-4 w-4 mr-2" />Recipes</TabsTrigger>
-            <TabsTrigger value="reports"><Activity className="h-4 w-4 mr-2" />Reports</TabsTrigger>
+            <TabsTrigger value="supplies"><Warehouse className="h-4 w-4 mr-2" />Barang</TabsTrigger>
+            <TabsTrigger value="purchases"><ShoppingCart className="h-4 w-4 mr-2" />Pembelian</TabsTrigger>
+            <TabsTrigger value="recipes"><BookOpen className="h-4 w-4 mr-2" />Resep</TabsTrigger>
+            <TabsTrigger value="reports"><Activity className="h-4 w-4 mr-2" />Laporan</TabsTrigger>
           </TabsList>
 
           <TabsContent value="supplies">

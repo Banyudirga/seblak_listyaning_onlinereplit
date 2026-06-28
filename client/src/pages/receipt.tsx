@@ -10,6 +10,19 @@ export default function Receipt() {
   const [, setLocation] = useLocation();
   const [order, setOrder] = useState<Order | null>(null);
 
+  const getServiceTypeText = (serviceType: string | null | undefined) => {
+    switch (serviceType) {
+      case "diantar":
+        return "Diantar";
+      case "diambil":
+        return "Diambil";
+      case "makan ditempat":
+        return "Makan di tempat";
+      default:
+        return serviceType ?? "-";
+    }
+  };
+
   useEffect(() => {
     // Get order data from sessionStorage
     const orderData = sessionStorage.getItem('currentOrder');
@@ -46,7 +59,7 @@ ${itemList}
 Nama: ${order.customerName}
 Telepon: ${order.customerPhone}
 Alamat: ${order.customerAddress}
-Cara Pelayanan: ${order.serviceType}
+Cara Pelayanan: ${getServiceTypeText(order.serviceType)}
 Metode Pembayaran: ${order.paymentMethod === 'cash' ? 'Tunai' :
                      order.paymentMethod === 'bank_transfer' ? 'Transfer Bank' :
                      order.paymentMethod?.toUpperCase()}
@@ -66,7 +79,7 @@ Terima kasih telah memesan di Seblak Listyaning! 🌶️`;
   if (!order) {
     return (
       <div className="min-h-screen bg-light-grey flex items-center justify-center">
-        <div className="text-center">Loading...</div>
+        <div className="text-center">Memuat...</div>
       </div>
     );
   }
@@ -120,7 +133,7 @@ Terima kasih telah memesan di Seblak Listyaning! 🌶️`;
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Cara Pelayanan:</span>
-                  <span className="font-medium capitalize">{order.serviceType}</span>
+                  <span className="font-medium">{getServiceTypeText(order.serviceType)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Metode Pembayaran:</span>

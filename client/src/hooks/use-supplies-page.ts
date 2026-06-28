@@ -74,8 +74,8 @@ export function useSuppliesPage({
     ]);
 
     toast({
-      title: "Refreshed",
-      description: "Supply data has been refreshed.",
+      title: "Data diperbarui",
+      description: "Data barang berhasil dimuat ulang.",
     });
   };
 
@@ -117,14 +117,14 @@ export function useSuppliesPage({
       await queryClient.invalidateQueries({ queryKey: ["/api/admin/supplies"] });
       onAddSupplySuccess();
       toast({
-        title: "Supply added",
-        description: "New supply item has been created.",
+        title: "Barang ditambahkan",
+        description: "Barang baru berhasil dibuat.",
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to add supply.",
+        title: "Terjadi kesalahan",
+        description: error.message || "Gagal menambahkan barang.",
         variant: "destructive",
       });
     },
@@ -149,14 +149,14 @@ export function useSuppliesPage({
       ]);
       onAddPurchaseSuccess();
       toast({
-        title: "Purchase recorded",
-        description: "Supply stock has been increased.",
+        title: "Pembelian dicatat",
+        description: "Stok barang berhasil ditambahkan.",
       });
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to record purchase.",
+        title: "Terjadi kesalahan",
+        description: "Gagal mencatat pembelian.",
         variant: "destructive",
       });
     },
@@ -196,14 +196,14 @@ export function useSuppliesPage({
 
       onRecipeSaveSuccess();
       toast({
-        title: "Recipe saved",
-        description: "Recipe is ready for stock deduction on sales.",
+        title: "Resep disimpan",
+        description: "Resep siap digunakan untuk pengurangan stok saat penjualan.",
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to save recipe.",
+        title: "Terjadi kesalahan",
+        description: error.message || "Gagal menyimpan resep.",
         variant: "destructive",
       });
     },

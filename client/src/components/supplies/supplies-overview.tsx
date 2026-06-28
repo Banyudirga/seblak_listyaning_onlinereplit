@@ -23,7 +23,7 @@ export function SuppliesOverview({
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">Total Supplies</CardTitle>
+            <CardTitle className="text-sm font-medium">Total barang</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-indonesian-red">{totalSupplies}</div>
@@ -32,7 +32,7 @@ export function SuppliesOverview({
 
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">Low Stock</CardTitle>
+            <CardTitle className="text-sm font-medium">Stok menipis</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-yellow-600">{lowStockCount}</div>
@@ -41,7 +41,7 @@ export function SuppliesOverview({
 
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">Purchases</CardTitle>
+            <CardTitle className="text-sm font-medium">Pembelian</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">{purchasesCount}</div>
@@ -50,7 +50,7 @@ export function SuppliesOverview({
 
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">Purchase Value</CardTitle>
+            <CardTitle className="text-sm font-medium">Nilai pembelian</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-600">{totalPurchaseValue}</div>
@@ -61,32 +61,32 @@ export function SuppliesOverview({
       <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-6 mb-6">
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">How This Flow Works</CardTitle>
+            <CardTitle className="text-base">Cara kerja alur ini</CardTitle>
           </CardHeader>
           <CardContent className="text-sm text-muted-foreground space-y-2">
-            <p>1. Add your raw supplies like crackers, noodles, eggs, or chili.</p>
-            <p>2. Record purchases to increase stock immediately.</p>
-            <p>3. Connect menu items to supplies in Recipes so confirmed sales can deduct ingredient stock.</p>
+            <p>1. Tambahkan bahan baku seperti kerupuk, mie, telur, atau cabai.</p>
+            <p>2. Catat pembelian agar stok langsung bertambah.</p>
+            <p>3. Hubungkan menu dengan barang di tab Resep agar penjualan yang dikonfirmasi dapat mengurangi stok bahan.</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">Quick Snapshot</CardTitle>
+            <CardTitle className="text-base">Ringkasan cepat</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Tracked units</span>
+              <span className="text-muted-foreground">Total unit tercatat</span>
               <span className="font-semibold">{totalSupplyUnits}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Recent purchases</span>
+              <span className="text-muted-foreground">Pembelian terbaru</span>
               <span className="font-semibold">{recentPurchasesCount}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Need attention</span>
+              <span className="text-muted-foreground">Perlu perhatian</span>
               <Badge className={lowStockCount > 0 ? "bg-yellow-100 text-yellow-800" : "bg-green-100 text-green-800"}>
-                {lowStockCount > 0 ? `${lowStockCount} low stock` : "All healthy"}
+                {lowStockCount > 0 ? `${lowStockCount} stok menipis` : "Semua aman"}
               </Badge>
             </div>
           </CardContent>

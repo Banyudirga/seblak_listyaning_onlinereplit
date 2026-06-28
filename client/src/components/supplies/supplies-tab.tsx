@@ -20,28 +20,28 @@ export function SuppliesTab({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Supply Stock</CardTitle>
+        <CardTitle>Stok barang</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
           <Input
             value={supplySearch}
             onChange={(e) => onSupplySearchChange(e.target.value)}
-            placeholder="Search by supply, supplier, or unit"
+            placeholder="Cari barang, supplier, atau satuan"
             className="md:max-w-sm"
           />
           <p className="text-sm text-muted-foreground">
-            {filteredSupplies.length} of {supplies.length} supplies shown
+            {filteredSupplies.length} dari {supplies.length} barang ditampilkan
           </p>
         </div>
 
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Unit</TableHead>
-              <TableHead>Stock</TableHead>
-              <TableHead>Threshold</TableHead>
+              <TableHead>Nama</TableHead>
+              <TableHead>Satuan</TableHead>
+              <TableHead>Stok</TableHead>
+              <TableHead>Batas minimum</TableHead>
               <TableHead>Supplier</TableHead>
               <TableHead>Status</TableHead>
             </TableRow>
@@ -56,7 +56,7 @@ export function SuppliesTab({
                 <TableCell>{supply.supplierName || "-"}</TableCell>
                 <TableCell>
                   <Badge className={supply.stockQuantity <= supply.lowStockThreshold ? "bg-yellow-100 text-yellow-800" : "bg-green-100 text-green-800"}>
-                    {supply.stockQuantity <= supply.lowStockThreshold ? "Low stock" : "Healthy"}
+                    {supply.stockQuantity <= supply.lowStockThreshold ? "Stok menipis" : "Aman"}
                   </Badge>
                 </TableCell>
               </TableRow>
@@ -65,8 +65,8 @@ export function SuppliesTab({
               <TableRow>
                 <TableCell colSpan={6} className="text-center text-gray-500 py-10">
                   {supplies.length === 0
-                    ? "No supplies yet. Add your first ingredient to start tracking stock."
-                    : "No supplies match your search."}
+                    ? "Belum ada barang. Tambahkan bahan pertama untuk mulai memantau stok."
+                    : "Tidak ada barang yang cocok dengan pencarian Anda."}
                 </TableCell>
               </TableRow>
             )}

@@ -50,11 +50,11 @@ export function RecipeEditorDialog({
   const hasDuplicateSupplies = new Set(selectedSupplyIds).size !== selectedSupplyIds.length;
   const formError =
     supplies.length === 0
-      ? "Add supplies before creating recipes."
+      ? "Tambahkan barang terlebih dahulu sebelum membuat resep."
       : hasDuplicateSupplies
-        ? "Each supply should only appear once in a recipe."
+        ? "Setiap barang hanya boleh muncul satu kali dalam resep."
         : items.some((item) => !item.supplyId || Number(item.quantityRequired) <= 0)
-          ? "Each ingredient needs a supply and a quantity greater than 0."
+          ? "Setiap bahan harus memiliki barang dan jumlah lebih dari 0."
           : null;
 
   const handleSubmit = () => {
@@ -69,13 +69,13 @@ export function RecipeEditorDialog({
         onInteractOutside={(event) => event.preventDefault()}
       >
         <DialogHeader className="shrink-0 border-b px-4 py-4 text-left sm:px-6">
-          <DialogTitle>Recipe - {menuItem?.name}</DialogTitle>
+          <DialogTitle>Resep - {menuItem?.name}</DialogTitle>
         </DialogHeader>
 
         <div className="flex min-h-0 flex-1 flex-col">
           <div className="flex-1 space-y-4 overflow-y-auto px-4 py-4 sm:px-6">
           <p className="text-sm text-muted-foreground">
-            Set how much of each supply is consumed every time this menu item is sold, using the supply base unit.
+            Tentukan berapa banyak setiap barang yang terpakai setiap kali menu ini terjual, menggunakan satuan dasar barang.
           </p>
 
           <Separator />
@@ -85,7 +85,7 @@ export function RecipeEditorDialog({
               <div className="grid grid-cols-1 md:grid-cols-[1fr_160px_96px] gap-2 items-center">
                 <Select value={item.supplyId} onValueChange={(value) => updateItem(index, { supplyId: value })}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select ingredient" />
+                    <SelectValue placeholder="Pilih bahan" />
                   </SelectTrigger>
                   <SelectContent>
                     {supplies.map((supply) => (
@@ -101,8 +101,8 @@ export function RecipeEditorDialog({
                   inputMode="numeric"
                   placeholder={
                     supplies.find((supply) => String(supply.id) === item.supplyId)?.unit
-                      ? `Qty per sale (${supplies.find((supply) => String(supply.id) === item.supplyId)?.unit})`
-                      : "Qty per sale"
+                      ? `Jumlah per penjualan (${supplies.find((supply) => String(supply.id) === item.supplyId)?.unit})`
+                      : "Jumlah per penjualan"
                   }
                   value={item.quantityRequired}
                   onChange={(e) => updateItem(index, { quantityRequired: e.target.value })}
@@ -113,7 +113,7 @@ export function RecipeEditorDialog({
                   onClick={() => setItems((current) => current.filter((_, i) => i !== index))}
                   disabled={items.length === 1}
                 >
-                  Remove
+                  Hapus
                 </Button>
               </div>
 
@@ -123,9 +123,9 @@ export function RecipeEditorDialog({
 
                 return (
                   <div className="text-sm text-muted-foreground">
-                    Available now: <span className="font-medium text-foreground">{selectedSupply.stockQuantity} {selectedSupply.unit}</span>
+                    Stok tersedia saat ini: <span className="font-medium text-foreground">{selectedSupply.stockQuantity} {selectedSupply.unit}</span>
                     {selectedSupply.stockQuantity <= selectedSupply.lowStockThreshold && (
-                      <span className="ml-2 text-yellow-700">This ingredient is already low on stock.</span>
+                      <span className="ml-2 text-yellow-700">Bahan ini sudah berada di batas stok minimum.</span>
                     )}
                   </div>
                 );
@@ -144,7 +144,7 @@ export function RecipeEditorDialog({
             }
           >
             <PlusCircle className="h-4 w-4 mr-2" />
-            Add Ingredient
+            Tambah bahan
           </Button>
 
           {formError && <p className="text-sm text-destructive">{formError}</p>}
@@ -152,7 +152,7 @@ export function RecipeEditorDialog({
           <div className="shrink-0 border-t bg-background/95 px-4 py-4 backdrop-blur sm:px-6">
             <div className="flex flex-col-reverse gap-2 sm:flex-row">
               <Button type="button" variant="outline" className="flex-1" onClick={onClose}>
-                Cancel
+                Batal
               </Button>
               <Button
                 type="button"
@@ -160,7 +160,7 @@ export function RecipeEditorDialog({
                 disabled={isSubmitting || !!formError}
                 onClick={handleSubmit}
               >
-                Save Recipe
+                Simpan resep
               </Button>
             </div>
           </div>

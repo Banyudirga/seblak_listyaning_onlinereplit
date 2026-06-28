@@ -195,7 +195,7 @@ export default function CheckoutModal() {
                       <SelectContent>
                         <SelectItem value="diantar">Diantar</SelectItem>
                         <SelectItem value="diambil">Diambil</SelectItem>
-                        <SelectItem value="makan ditempat">Makan ditempat</SelectItem>
+                        <SelectItem value="makan ditempat">Makan di tempat</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -236,7 +236,7 @@ export default function CheckoutModal() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="cash">Tunai (Cash)</SelectItem>
+                        <SelectItem value="cash">Tunai</SelectItem>
                         <SelectItem value="bank_transfer">Transfer Bank</SelectItem>
                         <SelectItem value="gopay">GoPay</SelectItem>
                         <SelectItem value="ovo">OVO</SelectItem>

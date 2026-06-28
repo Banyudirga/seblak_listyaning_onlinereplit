@@ -15,6 +15,18 @@ interface OrderCardProps {
 
 export default function OrderCard({ order, onUpdateStatus, isUpdating }: OrderCardProps) {
   const items = Array.isArray(order.items) ? order.items : [];
+  const getServiceTypeText = (serviceType: string | null | undefined) => {
+    switch (serviceType) {
+      case "diantar":
+        return "Diantar";
+      case "diambil":
+        return "Diambil";
+      case "makan ditempat":
+        return "Makan di tempat";
+      default:
+        return serviceType ?? "-";
+    }
+  };
 
   return (
     <Card className="shadow-sm">
@@ -58,7 +70,7 @@ export default function OrderCard({ order, onUpdateStatus, isUpdating }: OrderCa
               </div>
               <div className="flex items-center">
                 <Phone className="h-4 w-4 mr-1" />
-                <span className="font-medium w-16">Phone:</span>
+                <span className="font-medium w-16">Telepon:</span>
                 <a 
                   href={`tel:${order.customerPhone}`}
                   className="text-blue-600 hover:underline"
@@ -73,11 +85,11 @@ export default function OrderCard({ order, onUpdateStatus, isUpdating }: OrderCa
               </div>
               <div className="flex items-center">
                 <span className="font-medium w-20">Layanan:</span>
-                <span className="capitalize">{order.serviceType}</span>
+                <span>{getServiceTypeText(order.serviceType)}</span>
               </div>
               <div className="flex items-center">
                 <CreditCard className="h-4 w-4 mr-1" />
-                <span className="font-medium w-16">Payment:</span>
+                <span className="font-medium w-16">Bayar:</span>
                 <span>{getPaymentMethodText(order.paymentMethod)}</span>
               </div>
               {order.notes && (
@@ -111,7 +123,7 @@ export default function OrderCard({ order, onUpdateStatus, isUpdating }: OrderCa
         {/* Status Update */}
         <div className="mt-6 pt-4 border-t">
           <div className="flex items-center justify-between">
-            <span className="font-medium">Update Status:</span>
+            <span className="font-medium">Ubah status:</span>
             <div className="flex gap-2">
               {['confirmed', 'preparing', 'ready', 'delivered'].map((status) => (
                 <Button

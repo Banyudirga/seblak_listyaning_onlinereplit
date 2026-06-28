@@ -21,18 +21,18 @@ export function ReportsTab({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <AlertTriangle className="h-4 w-4 text-yellow-600" />
-            Low-Stock Alerts
+            Peringatan stok menipis
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3 text-sm">
           {lowStockSupplies.length === 0 ? (
-            <p className="text-muted-foreground">All supplies are above their alert threshold.</p>
+            <p className="text-muted-foreground">Semua barang masih di atas batas minimum.</p>
           ) : (
             lowStockSupplies.map((supply) => (
               <div key={supply.id} className="rounded-lg border p-3">
                 <div className="font-medium">{supply.name}</div>
                 <div className="text-muted-foreground">
-                  Current: {supply.stockQuantity} {supply.unit} · Alert at {supply.lowStockThreshold} {supply.unit}
+                  Saat ini: {supply.stockQuantity} {supply.unit} · Peringatan di {supply.lowStockThreshold} {supply.unit}
                 </div>
               </div>
             ))
@@ -44,25 +44,25 @@ export function ReportsTab({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Activity className="h-4 w-4 text-indonesian-red" />
-            Usage History
+            Riwayat pergerakan stok
           </CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Date</TableHead>
-                <TableHead>Supply</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Change</TableHead>
-                <TableHead>Reference</TableHead>
+                <TableHead>Tanggal</TableHead>
+                <TableHead>Barang</TableHead>
+                <TableHead>Tipe</TableHead>
+                <TableHead>Perubahan</TableHead>
+                <TableHead>Referensi</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {stockMovements.map((movement) => (
                 <TableRow key={movement.id}>
                   <TableCell>{movement.createdAt ? new Date(movement.createdAt).toLocaleString("id-ID") : "-"}</TableCell>
-                  <TableCell className="font-medium">{supplyNameById[movement.supplyId] || `Supply #${movement.supplyId}`}</TableCell>
+                  <TableCell className="font-medium">{supplyNameById[movement.supplyId] || `Barang #${movement.supplyId}`}</TableCell>
                   <TableCell className="capitalize">{movement.movementType}</TableCell>
                   <TableCell className={movement.quantityChange >= 0 ? "text-green-600 font-medium" : "text-red-600 font-medium"}>
                     {movement.quantityChange > 0 ? `+${movement.quantityChange}` : movement.quantityChange} {movement.unit}
@@ -76,7 +76,7 @@ export function ReportsTab({
               {stockMovements.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center text-gray-500 py-10">
-                    No stock movements yet. Purchases and sales will appear here.
+                    Belum ada pergerakan stok. Pembelian dan penjualan akan muncul di sini.
                   </TableCell>
                 </TableRow>
               )}

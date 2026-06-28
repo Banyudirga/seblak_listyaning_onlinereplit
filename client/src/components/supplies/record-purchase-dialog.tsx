@@ -64,13 +64,13 @@ export function RecordPurchaseDialog({
   const unitCost = Number(form.unitCost || 0);
   const formError =
     !form.supplyId
-      ? "Select a supply first."
+      ? "Pilih barang terlebih dahulu."
       : quantity <= 0
-        ? "Quantity must be greater than 0."
+        ? "Jumlah pembelian harus lebih dari 0."
         : baseUnitsPerPurchaseUnit <= 0
-          ? "Base unit conversion must be greater than 0."
+          ? "Konversi ke satuan dasar harus lebih dari 0."
           : unitCost < 0
-            ? "Unit cost cannot be negative."
+            ? "Harga per unit tidak boleh negatif."
             : null;
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -86,17 +86,17 @@ export function RecordPurchaseDialog({
         onInteractOutside={(event) => event.preventDefault()}
       >
         <DialogHeader className="shrink-0 border-b px-4 py-4 text-left sm:px-6">
-          <DialogTitle>Record Purchase</DialogTitle>
+          <DialogTitle>Catat pembelian</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
           <div className="flex-1 space-y-4 overflow-y-auto px-4 py-4 sm:px-6">
           <p className="text-sm text-muted-foreground">
-            Recording a purchase adds stock immediately for the selected supply.
+            Pencatatan pembelian akan langsung menambah stok barang yang dipilih.
           </p>
 
           <Select value={form.supplyId} onValueChange={(value) => setForm({ ...form, supplyId: value })}>
             <SelectTrigger>
-              <SelectValue placeholder="Select a supply" />
+              <SelectValue placeholder="Pilih barang" />
             </SelectTrigger>
             <SelectContent>
               {supplies.map((supply) => (
@@ -109,7 +109,7 @@ export function RecordPurchaseDialog({
 
           {selectedSupply && (
             <div className="rounded-md bg-muted p-3 text-sm">
-              Current stock: <span className="font-semibold">{selectedSupply.stockQuantity} {selectedSupply.unit}</span>
+              Stok saat ini: <span className="font-semibold">{selectedSupply.stockQuantity} {selectedSupply.unit}</span>
             </div>
           )}
 
@@ -117,13 +117,13 @@ export function RecordPurchaseDialog({
             <Input
               type="number"
               inputMode="numeric"
-              placeholder="How many units purchased"
+              placeholder="Jumlah unit yang dibeli"
               value={form.quantity}
               onChange={(e) => setForm({ ...form, quantity: e.target.value })}
             />
             <Select value={form.purchaseUnit} onValueChange={(value) => setForm({ ...form, purchaseUnit: value })}>
               <SelectTrigger>
-                <SelectValue placeholder="Purchase unit" />
+                <SelectValue placeholder="Satuan beli" />
               </SelectTrigger>
               <SelectContent>
                 {Array.from(new Set([selectedSupply?.unit ?? "pcs", ...PURCHASE_UNIT_OPTIONS])).map((unit) => (
@@ -139,14 +139,14 @@ export function RecordPurchaseDialog({
             <Input
               type="number"
               inputMode="numeric"
-              placeholder={`How many ${selectedSupply?.unit ?? "base units"} in 1 ${form.purchaseUnit}`}
+              placeholder={`Berapa ${selectedSupply?.unit ?? "satuan dasar"} dalam 1 ${form.purchaseUnit}`}
               value={form.baseUnitsPerPurchaseUnit}
               onChange={(e) => setForm({ ...form, baseUnitsPerPurchaseUnit: e.target.value })}
             />
             <Input
               type="number"
               inputMode="numeric"
-              placeholder="Unit cost"
+              placeholder="Harga per unit"
               value={form.unitCost}
               onChange={(e) => setForm({ ...form, unitCost: e.target.value })}
             />
@@ -155,33 +155,33 @@ export function RecordPurchaseDialog({
           {selectedSupply && (
             <div className="rounded-md border border-dashed p-3 text-sm text-muted-foreground">
               {getSuggestedConversion(form.purchaseUnit, selectedSupply.unit) !== null
-                ? `Preset applied: 1 ${form.purchaseUnit} = ${getSuggestedConversion(form.purchaseUnit, selectedSupply.unit)} ${selectedSupply.unit}`
-                : `Custom conversion: set how many ${selectedSupply.unit} are inside 1 ${form.purchaseUnit}`}
+                ? `Preset diterapkan: 1 ${form.purchaseUnit} = ${getSuggestedConversion(form.purchaseUnit, selectedSupply.unit)} ${selectedSupply.unit}`
+                : `Konversi manual: isi berapa ${selectedSupply.unit} di dalam 1 ${form.purchaseUnit}`}
             </div>
           )}
 
           <Input
-            placeholder="Supplier name"
+            placeholder="Nama supplier"
             value={form.supplierName}
             onChange={(e) => setForm({ ...form, supplierName: e.target.value })}
           />
           <Textarea
-            placeholder="Notes (optional)"
+            placeholder="Catatan (opsional)"
             value={form.notes}
             onChange={(e) => setForm({ ...form, notes: e.target.value })}
           />
 
           <div className="rounded-md bg-muted p-3 text-sm">
             <div>
-              Estimated total: <span className="font-semibold">{formatRupiah(quantity * unitCost)}</span>
+              Estimasi total: <span className="font-semibold">{formatRupiah(quantity * unitCost)}</span>
             </div>
             {selectedSupply && (
               <>
                 <div className="mt-1 text-muted-foreground">
-                  Stock increase: <span className="font-semibold text-foreground">{Math.max(quantity, 0) * Math.max(baseUnitsPerPurchaseUnit, 0)} {selectedSupply.unit}</span>
+                  Penambahan stok: <span className="font-semibold text-foreground">{Math.max(quantity, 0) * Math.max(baseUnitsPerPurchaseUnit, 0)} {selectedSupply.unit}</span>
                 </div>
                 <div className="mt-1 text-muted-foreground">
-                  Stock after purchase: <span className="font-semibold text-foreground">{selectedSupply.stockQuantity + Math.max(quantity, 0) * Math.max(baseUnitsPerPurchaseUnit, 0)} {selectedSupply.unit}</span>
+                  Stok setelah pembelian: <span className="font-semibold text-foreground">{selectedSupply.stockQuantity + Math.max(quantity, 0) * Math.max(baseUnitsPerPurchaseUnit, 0)} {selectedSupply.unit}</span>
                 </div>
               </>
             )}
@@ -192,10 +192,10 @@ export function RecordPurchaseDialog({
           <div className="shrink-0 border-t bg-background/95 px-4 py-4 backdrop-blur sm:px-6">
             <div className="flex flex-col-reverse gap-2 sm:flex-row">
               <Button type="button" variant="outline" className="flex-1" onClick={onClose}>
-                Cancel
+                Batal
               </Button>
               <Button type="submit" className="flex-1" disabled={isSubmitting || !!formError}>
-                Save Purchase
+                Simpan pembelian
               </Button>
             </div>
           </div>

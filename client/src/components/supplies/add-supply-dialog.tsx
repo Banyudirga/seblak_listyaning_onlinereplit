@@ -63,9 +63,9 @@ export function AddSupplyDialog({
     !form.name.trim()
       ? "Nama barang harus diisi"
       : !form.unit.trim()
-        ? "Unit is required."
+        ? "Satuan stok wajib dipilih."
         : stockQuantity < 0 || lowStockThreshold < 0
-          ? "Stock and threshold must be zero or greater."
+          ? "Stok dan batas minimum harus bernilai 0 atau lebih."
           : null;
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {

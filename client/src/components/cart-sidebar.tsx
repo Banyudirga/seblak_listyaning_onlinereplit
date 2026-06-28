@@ -103,7 +103,7 @@ export default function CartSidebar() {
               className="w-full bg-indonesian-red text-white hover:bg-red-600"
             >
               <CreditCard className="h-4 w-4 mr-2" />
-              Checkout
+              Lanjut checkout
             </Button>
           </div>
         )}

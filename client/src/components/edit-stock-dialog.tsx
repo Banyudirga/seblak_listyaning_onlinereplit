@@ -9,8 +9,8 @@ import type { MenuItem } from "@shared/schema";
 import { useEffect } from "react";
 
 const updateStockSchema = z.object({
-  stockQuantity: z.number().min(0, "Stock cannot be negative"),
-  lowStockThreshold: z.number().min(1, "Threshold must be at least 1"),
+  stockQuantity: z.number().min(0, "Stok tidak boleh negatif"),
+  lowStockThreshold: z.number().min(1, "Batas minimum harus minimal 1"),
 });
 
 export type UpdateStockForm = z.infer<typeof updateStockSchema>;
@@ -46,7 +46,7 @@ export default function EditStockDialog({ item, isOpen, onClose, onSubmit, isUpd
         onInteractOutside={(event) => event.preventDefault()}
       >
         <DialogHeader className="shrink-0 border-b px-4 py-4 text-left sm:px-6">
-          <DialogTitle>Update Stock - {item.name}</DialogTitle>
+          <DialogTitle>Perbarui stok - {item.name}</DialogTitle>
         </DialogHeader>
         
         <Form {...form}>
@@ -57,7 +57,7 @@ export default function EditStockDialog({ item, isOpen, onClose, onSubmit, isUpd
               name="stockQuantity"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Current Stock ({item.unit})</FormLabel>
+                  <FormLabel>Stok saat ini ({item.unit})</FormLabel>
                   <FormControl>
                     <Input 
                       type="number" 
@@ -76,7 +76,7 @@ export default function EditStockDialog({ item, isOpen, onClose, onSubmit, isUpd
               name="lowStockThreshold"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Low Stock Alert Threshold ({item.unit})</FormLabel>
+                  <FormLabel>Batas stok minimum ({item.unit})</FormLabel>
                   <FormControl>
                     <Input 
                       type="number" 
@@ -99,14 +99,14 @@ export default function EditStockDialog({ item, isOpen, onClose, onSubmit, isUpd
                   onClick={onClose}
                   className="flex-1"
                 >
-                  Cancel
+                  Batal
                 </Button>
                 <Button 
                   type="submit" 
                   disabled={isUpdating}
                   className="flex-1"
                 >
-                  Update Stock
+                  Perbarui stok
                 </Button>
               </div>
             </div>
