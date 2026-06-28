@@ -3,15 +3,16 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FileText, RefreshCw, Package, ArrowLeft, Warehouse } from "lucide-react";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { FileText, RefreshCw, Package, ArrowLeft, Warehouse, LogOut } from "lucide-react";
+import { apiRequest, getApiUrl, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import type { Order } from "@shared/schema";
 import OrderCard from "@/components/order-card";
 
 export default function Admin() {
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
 
   const { data: orders = [], isLoading, refetch } = useQuery<Order[]>({
@@ -86,6 +87,33 @@ export default function Admin() {
     ready: orders.filter((o: Order) => o.status === 'ready').length,
   };
 
+  const handleLogout = async () => {
+    try {
+      const res = await fetch(getApiUrl('/api/admin/logout'), {
+        method: 'POST',
+        credentials: 'include',
+      });
+
+      if (!res.ok) {
+        const text = (await res.text()) || res.statusText;
+        throw new Error(text);
+      }
+
+      await queryClient.invalidateQueries({ queryKey: ['admin-session'] });
+      setLocation('/admin/login');
+      toast({
+        title: 'Berhasil keluar',
+        description: 'Sesi admin telah diakhiri.',
+      });
+    } catch (error) {
+      toast({
+        title: 'Terjadi kesalahan',
+        description: error instanceof Error ? error.message : 'Gagal keluar dari sesi admin.',
+        variant: 'destructive',
+      });
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-light-grey flex items-center justify-center">
@@ -139,6 +167,14 @@ export default function Admin() {
               >
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Muat ulang
+              </Button>
+              <Button 
+                onClick={handleLogout}
+                variant="outline" 
+                className="text-indonesian-red border-white hover:bg-white"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Keluar
               </Button>
             </div>
           </div>

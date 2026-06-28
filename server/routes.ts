@@ -1,5 +1,6 @@
-import type { Express, Request, Response } from "express";
+import type { Express, NextFunction, Request, Response } from "express";
 import { createServer, type Server } from "http";
+import { createHmac, timingSafeEqual } from "crypto";
 import multer from "multer";
 import { nanoid } from "nanoid";
 import { storage } from "./storage";
@@ -8,11 +9,100 @@ import { insertOrderSchema, insertMenuItemSchema, insertSupplySchema, insertSupp
 import { z } from "zod";
 
 const SUPPLY_IMAGE_BUCKET = "supply-images";
+const ADMIN_SESSION_COOKIE = "admin_session";
+const ADMIN_SESSION_TTL_MS = 1000 * 60 * 60 * 12;
+
 const supplyImageUpload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => cb(null, file.mimetype.startsWith("image/")),
 });
+
+function getAdminPassword() {
+  return process.env.ADMIN_PASSWORD || "";
+}
+
+function getCookieValue(req: Request, name: string) {
+  const cookieHeader = req.headers.cookie;
+  if (!cookieHeader) return null;
+
+  for (const cookiePart of cookieHeader.split(";")) {
+    const [key, ...valueParts] = cookiePart.trim().split("=");
+    if (key === name) return decodeURIComponent(valueParts.join("="));
+  }
+
+  return null;
+}
+
+function buildAdminSessionToken(expiresAt: number) {
+  const signature = createHmac("sha256", getAdminPassword())
+    .update(String(expiresAt))
+    .digest("hex");
+
+  return `${expiresAt}.${signature}`;
+}
+
+function hasValidAdminSession(req: Request) {
+  const adminPassword = getAdminPassword();
+  const token = getCookieValue(req, ADMIN_SESSION_COOKIE);
+  if (!adminPassword || !token) return false;
+
+  const [expiresAtRaw, signature] = token.split(".");
+  const expiresAt = Number(expiresAtRaw);
+  if (!Number.isFinite(expiresAt) || expiresAt <= Date.now() || !signature) return false;
+
+  const expectedSignature = buildAdminSessionToken(expiresAt).split(".")[1];
+  const actualBuffer = Buffer.from(signature);
+  const expectedBuffer = Buffer.from(expectedSignature);
+  if (actualBuffer.length !== expectedBuffer.length) return false;
+
+  return timingSafeEqual(actualBuffer, expectedBuffer);
+}
+
+function getAdminCookieOptions() {
+  const secure = process.env.NODE_ENV === "production";
+  return {
+    httpOnly: true,
+    secure,
+    sameSite: secure ? "none" as const : "lax" as const,
+    maxAge: ADMIN_SESSION_TTL_MS,
+    path: "/",
+  };
+}
+
+const getAdminSession = (req: Request, res: Response) => {
+  res.json({ authenticated: hasValidAdminSession(req) });
+};
+
+const adminLogin = (req: Request, res: Response) => {
+  const adminPassword = getAdminPassword();
+  const { password } = req.body ?? {};
+
+  if (!adminPassword) {
+    return res.status(500).json({ message: "ADMIN_PASSWORD belum diatur di server." });
+  }
+
+  if (typeof password !== "string" || !password.trim()) {
+    return res.status(400).json({ message: "Password admin wajib diisi." });
+  }
+
+  if (password !== adminPassword) {
+    return res.status(401).json({ message: "Password admin salah." });
+  }
+
+  res.cookie(ADMIN_SESSION_COOKIE, buildAdminSessionToken(Date.now() + ADMIN_SESSION_TTL_MS), getAdminCookieOptions());
+  return res.json({ success: true });
+};
+
+const adminLogout = (_req: Request, res: Response) => {
+  res.clearCookie(ADMIN_SESSION_COOKIE, getAdminCookieOptions());
+  res.json({ success: true });
+};
+
+const requireAdminAuth = (req: Request, res: Response, next: NextFunction) => {
+  if (hasValidAdminSession(req)) return next();
+  return res.status(401).json({ message: "Akses admin memerlukan login." });
+};
 
 // --- Reusable Route Handlers ---
 
@@ -306,6 +396,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/orders/:id", getOrderById);
   app.get("/api/orders", getAllOrders);
   app.patch("/api/orders/:id/status", updateOrderStatus);
+
+  app.get("/api/admin/session", getAdminSession);
+  app.post("/api/admin/login", adminLogin);
+  app.post("/api/admin/logout", adminLogout);
+  app.use("/api/admin", requireAdminAuth);
 
   // --- Admin API Routes ---
   app.get("/api/admin/orders", getAllOrders);
