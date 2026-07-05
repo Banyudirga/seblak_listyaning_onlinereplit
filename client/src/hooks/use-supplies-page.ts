@@ -107,7 +107,9 @@ export function useSuppliesPage({
       return apiRequest("POST", "/api/admin/supplies", {
         name: form.name,
         imageUrl,
-        unit: form.unit,
+        unit: form.unit.trim(),
+        defaultPurchaseUnit: form.defaultPurchaseUnit.trim(),
+        defaultBaseUnitsPerPurchaseUnit: Number(form.defaultBaseUnitsPerPurchaseUnit),
         stockQuantity: Number(form.stockQuantity),
         lowStockThreshold: Number(form.lowStockThreshold),
         supplierName: form.supplierName || null,

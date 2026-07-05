@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { SupplyForm } from "@/components/supplies/supplies-types";
+import { COMMON_UNIT_SUGGESTIONS } from "@/components/supplies/supplies-types";
 
 type AddSupplyDialogProps = {
   open: boolean;
@@ -25,6 +25,8 @@ export function AddSupplyDialog({
     imageUrl: "",
     imageFile: null,
     unit: "pcs",
+    defaultPurchaseUnit: "box",
+    defaultBaseUnitsPerPurchaseUnit: "1",
     stockQuantity: "",
     lowStockThreshold: "",
     supplierName: "",
@@ -38,6 +40,8 @@ export function AddSupplyDialog({
         imageUrl: "",
         imageFile: null,
         unit: "pcs",
+        defaultPurchaseUnit: "box",
+        defaultBaseUnitsPerPurchaseUnit: "1",
         stockQuantity: "",
         lowStockThreshold: "",
         supplierName: "",
@@ -58,15 +62,20 @@ export function AddSupplyDialog({
   const stockQuantity = Number(form.stockQuantity || 0);
   const imagePreviewUrl = localPreviewUrl || form.imageUrl.trim();
   const lowStockThreshold = Number(form.lowStockThreshold || 0);
+  const defaultConversion = Number(form.defaultBaseUnitsPerPurchaseUnit || 0);
   const selectedFileName = form.imageFile?.name ?? "Belum ada file dipilih";
   const formError =
     !form.name.trim()
       ? "Nama barang harus diisi"
       : !form.unit.trim()
-        ? "Satuan stok wajib dipilih."
-        : stockQuantity < 0 || lowStockThreshold < 0
-          ? "Stok dan batas minimum harus bernilai 0 atau lebih."
-          : null;
+        ? "Satuan stok wajib diisi."
+        : !form.defaultPurchaseUnit.trim()
+          ? "Satuan beli default wajib diisi."
+          : defaultConversion <= 0
+            ? "Nilai konversi default harus lebih dari 0."
+            : stockQuantity < 0 || lowStockThreshold < 0
+              ? "Stok dan batas minimum harus bernilai 0 atau lebih."
+              : null;
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -128,16 +137,7 @@ export function AddSupplyDialog({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Satuan stok</Label>
-              <Select value={form.unit} onValueChange={(value) => setForm({ ...form, unit: value })}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Pilih satuan stok" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="pcs">pcs</SelectItem>
-                  <SelectItem value="gram">gram</SelectItem>
-                  <SelectItem value="ml">ml</SelectItem>
-                </SelectContent>
-              </Select>
+              <Input list="supply-unit-suggestions" placeholder="Contoh: pcs, gram, ml, lembar, butir" value={form.unit} onChange={(e) => setForm({ ...form, unit: e.target.value })} />
             </div>
             <div className="space-y-2">
               <Label>Supplier default</Label>
@@ -146,6 +146,16 @@ export function AddSupplyDialog({
                 value={form.supplierName}
                 onChange={(e) => setForm({ ...form, supplierName: e.target.value })}
               />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label>Satuan beli default</Label>
+              <Input list="supply-unit-suggestions" placeholder="Contoh: box, bungkus, pack" value={form.defaultPurchaseUnit} onChange={(e) => setForm({ ...form, defaultPurchaseUnit: e.target.value })} />
+            </div>
+            <div className="space-y-2">
+              <Label>Nilai konversi default</Label>
+              <Input type="number" inputMode="numeric" placeholder={`Berapa ${form.unit || "satuan stok"} dalam 1 ${form.defaultPurchaseUnit || "satuan beli"}`} value={form.defaultBaseUnitsPerPurchaseUnit} onChange={(e) => setForm({ ...form, defaultBaseUnitsPerPurchaseUnit: e.target.value })} />
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -170,9 +180,11 @@ export function AddSupplyDialog({
               />
             </div>
           </div>
+          <datalist id="supply-unit-suggestions">
+            {COMMON_UNIT_SUGGESTIONS.map((unit) => <option key={unit} value={unit} />)}
+          </datalist>
           <div className="rounded-lg border bg-muted/40 p-3 text-sm text-muted-foreground">
-            Ringkasan: item ini mulai dengan <span className="font-semibold text-foreground">{stockQuantity}</span> {form.unit}
-            {" "}dan akan diberi peringatan saat stok mencapai <span className="font-semibold text-foreground">{lowStockThreshold}</span> {form.unit}.
+            Ringkasan: item ini mulai dengan <span className="font-semibold text-foreground">{stockQuantity}</span> {form.unit}, memakai default pembelian <span className="font-semibold text-foreground">1 {form.defaultPurchaseUnit}</span> = <span className="font-semibold text-foreground">{defaultConversion || 0} {form.unit}</span>, dan akan diberi peringatan saat stok mencapai <span className="font-semibold text-foreground">{lowStockThreshold}</span> {form.unit}.
           </div>
           </div>
           <div className="shrink-0 border-t bg-background/95 px-4 py-4 backdrop-blur sm:px-6">

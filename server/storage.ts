@@ -105,6 +105,8 @@ export class MemStorage implements IStorage {
       name: supply.name,
       imageUrl: supply.imageUrl ?? null,
       unit: supply.unit ?? "pcs",
+      defaultPurchaseUnit: supply.defaultPurchaseUnit ?? supply.unit ?? "pcs",
+      defaultBaseUnitsPerPurchaseUnit: supply.defaultBaseUnitsPerPurchaseUnit ?? 1,
       stockQuantity: supply.stockQuantity ?? 0,
       lowStockThreshold: supply.lowStockThreshold ?? 0,
       supplierName: supply.supplierName ?? null,

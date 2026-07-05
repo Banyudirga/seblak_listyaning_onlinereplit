@@ -41,35 +41,49 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request)
       .then((response) => {
-        // Cache hit - return response
         if (response) {
           return response;
         }
 
-        // Clone the request
         const fetchRequest = event.request.clone();
 
-        return fetch(fetchRequest).then(
-          (response) => {
-            // Check if we received a valid response
+        return fetch(fetchRequest)
+          .then((response) => {
             if (!response || response.status !== 200 || response.type !== 'basic') {
               return response;
             }
 
-            // Clone the response
             const responseToCache = response.clone();
 
             caches.open(CACHE_NAME)
               .then((cache) => {
-                // Don't cache API requests
                 if (!event.request.url.includes('/api/')) {
                   cache.put(event.request, responseToCache);
                 }
               });
 
             return response;
-          }
-        );
+          })
+          .catch((error) => {
+            fetch('http://127.0.0.1:7777/event', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                sessionId: 'admin-login-fetch',
+                runId: 'pre-fix',
+                hypothesisId: 'A',
+                location: 'client/public/service-worker.js:fetch',
+                msg: '[DEBUG] service worker fetch failed',
+                data: {
+                  url: event.request.url,
+                  mode: event.request.mode,
+                  method: event.request.method,
+                },
+                ts: Date.now(),
+              }),
+            }).catch(() => {});
+            throw error;
+          });
       })
   );
 });

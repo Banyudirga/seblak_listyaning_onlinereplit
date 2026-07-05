@@ -102,6 +102,8 @@ export interface Database {
           id: number
           name: string
           unit: string
+          default_purchase_unit: string
+          default_base_units_per_purchase_unit: number
           stock_quantity: number
           low_stock_threshold: number
           supplier_name: string | null
@@ -111,6 +113,8 @@ export interface Database {
           id?: number
           name: string
           unit?: string
+          default_purchase_unit?: string
+          default_base_units_per_purchase_unit?: number
           stock_quantity?: number
           low_stock_threshold?: number
           supplier_name?: string | null
@@ -120,6 +124,8 @@ export interface Database {
           id?: number
           name?: string
           unit?: string
+          default_purchase_unit?: string
+          default_base_units_per_purchase_unit?: number
           stock_quantity?: number
           low_stock_threshold?: number
           supplier_name?: string | null

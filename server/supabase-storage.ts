@@ -14,6 +14,8 @@ export class SupabaseStorage implements IStorage {
       name: data.name,
       imageUrl: data.image_url,
       unit: data.unit,
+      defaultPurchaseUnit: data.default_purchase_unit,
+      defaultBaseUnitsPerPurchaseUnit: data.default_base_units_per_purchase_unit,
       stockQuantity: data.stock_quantity,
       lowStockThreshold: data.low_stock_threshold,
       supplierName: data.supplier_name,
@@ -365,6 +367,8 @@ async updateOrderStatus(id: number, status: string): Promise<Order | undefined> 
     const baseInsert = {
       name: supply.name,
       unit: supply.unit,
+      default_purchase_unit: supply.defaultPurchaseUnit,
+      default_base_units_per_purchase_unit: supply.defaultBaseUnitsPerPurchaseUnit,
       stock_quantity: supply.stockQuantity,
       low_stock_threshold: supply.lowStockThreshold,
       supplier_name: supply.supplierName,

@@ -8,6 +8,8 @@ export type SupplyForm = {
   imageUrl: string;
   imageFile: File | null;
   unit: string;
+  defaultPurchaseUnit: string;
+  defaultBaseUnitsPerPurchaseUnit: string;
   stockQuantity: string;
   lowStockThreshold: string;
   supplierName: string;
@@ -28,7 +30,7 @@ export type RecipeDraft = {
   quantityRequired: string;
 };
 
-export const PURCHASE_UNIT_OPTIONS = ["pcs", "gram", "kg", "ml", "liter", "pack", "box"];
+export const COMMON_UNIT_SUGGESTIONS = ["pcs", "gram", "kg", "ml", "liter", "pack", "box", "bungkus", "botol", "sachet", "tray", "kaleng"];
 
 export function getSuggestedConversion(purchaseUnit: string, baseUnit: string) {
   if (purchaseUnit === baseUnit) return 1;

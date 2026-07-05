@@ -37,6 +37,8 @@ export const supplies = pgTable("supplies", {
   name: text("name").notNull(),
   imageUrl: text("image_url"),
   unit: text("unit").notNull().default("pcs"),
+  defaultPurchaseUnit: text("default_purchase_unit").notNull().default("pcs"),
+  defaultBaseUnitsPerPurchaseUnit: integer("default_base_units_per_purchase_unit").notNull().default(1),
   stockQuantity: integer("stock_quantity").notNull().default(0),
   lowStockThreshold: integer("low_stock_threshold").notNull().default(0),
   supplierName: text("supplier_name"),
@@ -76,7 +78,7 @@ export const stockMovements = pgTable("stock_movements", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-const baseSupplyUnitSchema = z.enum(["pcs", "gram", "ml"]);
+const baseSupplyUnitSchema = z.string().trim().min(1);
 
 export const insertMenuItemSchema = createInsertSchema(menuItems).omit({ id: true });
 export const insertOrderSchema = createInsertSchema(orders).omit({ id: true, createdAt: true, status: true });
@@ -84,6 +86,8 @@ export const insertSupplySchema = createInsertSchema(supplies)
   .omit({ id: true, createdAt: true })
   .extend({
     unit: baseSupplyUnitSchema,
+    defaultPurchaseUnit: z.string().trim().min(1),
+    defaultBaseUnitsPerPurchaseUnit: z.number().int().positive(),
     imageUrl: z.string().url().optional().nullable().or(z.literal("")).transform((value) => value || undefined),
     stockQuantity: z.number().int().min(0),
     lowStockThreshold: z.number().int().min(0),
