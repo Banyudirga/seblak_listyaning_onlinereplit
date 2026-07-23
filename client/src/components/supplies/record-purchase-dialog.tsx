@@ -5,6 +5,7 @@ import { COMMON_UNIT_SUGGESTIONS, getSuggestedConversion, type PurchaseForm } fr
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import type { Supply } from "@shared/schema";
@@ -78,6 +79,7 @@ export function RecordPurchaseDialog({
   const quantity = Number(form.quantity || 0);
   const baseUnitsPerPurchaseUnit = Number(form.baseUnitsPerPurchaseUnit || 0);
   const unitCost = Number(form.unitCost || 0);
+  const totalCost = Math.max(quantity, 0) * Math.max(unitCost, 0);
   const formError =
     !form.supplyId
       ? "Pilih barang terlebih dahulu."
@@ -86,7 +88,7 @@ export function RecordPurchaseDialog({
         : baseUnitsPerPurchaseUnit <= 0
           ? "Konversi ke satuan dasar harus lebih dari 0."
           : unitCost < 0
-            ? "Harga per unit tidak boleh negatif."
+            ? "Harga satuan tidak boleh negatif."
             : null;
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -135,20 +137,31 @@ export function RecordPurchaseDialog({
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Input
-              type="number"
-              inputMode="numeric"
-              placeholder={`Berapa ${selectedSupply?.unit ?? "satuan dasar"} dalam 1 ${form.purchaseUnit}`}
-              value={form.baseUnitsPerPurchaseUnit}
-              onChange={(e) => setForm({ ...form, baseUnitsPerPurchaseUnit: e.target.value })}
-            />
-            <Input
-              type="number"
-              inputMode="numeric"
-              placeholder="Harga per unit"
-              value={form.unitCost}
-              onChange={(e) => setForm({ ...form, unitCost: e.target.value })}
-            />
+            <div className="space-y-2">
+              <Label>Nilai konversi</Label>
+              <Input
+                type="number"
+                inputMode="numeric"
+                placeholder={`Berapa ${selectedSupply?.unit ?? "satuan dasar"} dalam 1 ${form.purchaseUnit}`}
+                value={form.baseUnitsPerPurchaseUnit}
+                onChange={(e) => setForm({ ...form, baseUnitsPerPurchaseUnit: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Harga satuan</Label>
+              <Input
+                type="number"
+                inputMode="numeric"
+                placeholder="Contoh: 25000"
+                value={form.unitCost}
+                onChange={(e) => setForm({ ...form, unitCost: e.target.value })}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Total harga</Label>
+            <Input value={formatRupiah(totalCost)} readOnly className="bg-muted" />
           </div>
 
           {selectedSupply && (
@@ -177,7 +190,7 @@ export function RecordPurchaseDialog({
 
           <div className="rounded-md bg-muted p-3 text-sm">
             <div>
-              Estimasi total: <span className="font-semibold">{formatRupiah(quantity * unitCost)}</span>
+              Total pembelian: <span className="font-semibold">{formatRupiah(totalCost)}</span>
             </div>
             {selectedSupply && (
               <>

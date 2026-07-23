@@ -6,6 +6,7 @@ import { RefreshCw } from "lucide-react";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Home from "@/pages/home";
+import MenuPage from "@/pages/menu";
 import Receipt from "@/pages/receipt";
 import Admin from "@/pages/admin";
 import Inventory from "@/pages/inventory";
@@ -70,6 +71,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/menu" component={MenuPage} />
       <Route path="/receipt" component={Receipt} />
       <Route path="/admin/login" component={AdminLogin} />
       <Route path="/admin" component={ProtectedAdminPage} />

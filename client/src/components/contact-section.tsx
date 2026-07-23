@@ -1,7 +1,13 @@
-import { MapPin, Phone, Mail } from "lucide-react";
+import { ExternalLink, MapPin, Phone, Mail } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { formatPhoneNumberDisplay } from "@/lib/format";
 
 export default function ContactSection() {
+  const googleMapsUrl =
+    "https://www.google.com/maps/place/Angkringan+Seblak+Prasmanan+Listyaning/@-6.1931294,106.9628834,868m/data=!3m2!1e3!4b1!4m6!3m5!1s0x2e698bab8eb36127:0xb6d4d9b91a1eb24c!8m2!3d-6.1931294!4d106.9654583!16s%2Fg%2F11y8t7fbx3?entry=ttu&g_ep=EgoyMDI2MDcyMC4wIKXMDSoASAFQAw%3D%3D";
+  const googleMapsEmbedUrl =
+    "https://maps.google.com/maps?q=Jl.%20Raya%20Rw.%20Kuning%20No.22%2C%20RT.1%2FRW.2%2C%20Pulo%20Gebang%2C%20Kec.%20Cakung%2C%20Kota%20Jakarta%20Timur%2C%20Daerah%20Khusus%20Ibukota%20Jakarta%2013950&t=&z=16&ie=UTF8&iwloc=&output=embed";
+
   return (
     <section className="py-16 bg-light-grey">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -22,9 +28,37 @@ export default function ContactSection() {
               </div>
               <h3 className="text-xl font-bold text-dark-grey mb-2">Alamat</h3>
               <p className="text-gray-600">
-                Jl. Raya Sukabumi No. 123<br />
-                Bandung, Jawa Barat 40123
+                Jl. Raya Rw. Kuning No.22, RT.1/RW.2, Pulo Gebang, Kec. Cakung,
+                Kota Jakarta Timur, Daerah Khusus Ibukota Jakarta 13950
               </p>
+              <a
+                href={googleMapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group mt-4 block"
+              >
+                <div className="relative overflow-hidden rounded-xl border border-gray-200">
+                  <iframe
+                    src={googleMapsEmbedUrl}
+                    title="Peta lokasi Seblak Listyaning"
+                    className="h-32 w-full"
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                  />
+                  <div className="absolute right-2 top-2 rounded-full bg-white/95 px-3 py-1 text-xs font-medium text-indonesian-red shadow-sm">
+                    Cek map
+                  </div>
+                </div>
+              </a>
+              <a
+                href={googleMapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-2 inline-flex items-center gap-1 text-indonesian-red font-medium hover:underline"
+              >
+                Lihat di Google Maps
+                <ExternalLink className="h-4 w-4" />
+              </a>
             </CardContent>
           </Card>
           
@@ -34,9 +68,9 @@ export default function ContactSection() {
                 <Phone className="h-8 w-8 text-white" />
               </div>
               <h3 className="text-xl font-bold text-dark-grey mb-2">Telepon</h3>
-              <p className="text-gray-600">+62-812-3456-7890</p>
+              <p className="text-gray-600">{formatPhoneNumberDisplay("+6281533121536")}</p>
               <a 
-                href="tel:+6281234567890" 
+                href="tel:+6281533121536"
                 className="text-indonesian-red font-medium hover:underline"
               >
                 Hubungi Sekarang

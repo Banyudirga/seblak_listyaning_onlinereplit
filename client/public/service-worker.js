@@ -1,5 +1,8 @@
 // Service Worker for Seblak Delivery PWA
-const CACHE_NAME = 'seblak-delivery-v1';
+const CACHE_NAME = 'seblak-delivery-v2';
+const isLocalhost =
+  self.location.hostname === 'localhost' ||
+  self.location.hostname === '127.0.0.1';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -11,6 +14,11 @@ const urlsToCache = [
 
 // Install event - cache assets
 self.addEventListener('install', (event) => {
+  if (isLocalhost) {
+    event.waitUntil(self.skipWaiting());
+    return;
+  }
+
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
@@ -22,6 +30,15 @@ self.addEventListener('install', (event) => {
 
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
+  if (isLocalhost) {
+    event.waitUntil((async () => {
+      const cacheNames = await caches.keys();
+      await Promise.all(cacheNames.map((cacheName) => caches.delete(cacheName)));
+      await self.registration.unregister();
+    })());
+    return;
+  }
+
   const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -38,6 +55,20 @@ self.addEventListener('activate', (event) => {
 
 // Fetch event - serve from cache or network
 self.addEventListener('fetch', (event) => {
+  const requestUrl = new URL(event.request.url);
+  const isDevAssetRequest =
+    requestUrl.origin !== self.location.origin ||
+    requestUrl.pathname.startsWith('/src/') ||
+    requestUrl.pathname.startsWith('/node_modules/') ||
+    requestUrl.pathname.includes('/@vite/') ||
+    requestUrl.searchParams.has('t') ||
+    event.request.method !== 'GET';
+
+  if (isLocalhost || isDevAssetRequest || event.request.url.includes('/api/')) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request)
       .then((response) => {
@@ -57,32 +88,10 @@ self.addEventListener('fetch', (event) => {
 
             caches.open(CACHE_NAME)
               .then((cache) => {
-                if (!event.request.url.includes('/api/')) {
-                  cache.put(event.request, responseToCache);
-                }
+                cache.put(event.request, responseToCache);
               });
 
             return response;
-          })
-          .catch((error) => {
-            fetch('http://127.0.0.1:7777/event', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                sessionId: 'admin-login-fetch',
-                runId: 'pre-fix',
-                hypothesisId: 'A',
-                location: 'client/public/service-worker.js:fetch',
-                msg: '[DEBUG] service worker fetch failed',
-                data: {
-                  url: event.request.url,
-                  mode: event.request.mode,
-                  method: event.request.method,
-                },
-                ts: Date.now(),
-              }),
-            }).catch(() => {});
-            throw error;
           });
       })
   );

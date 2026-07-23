@@ -66,7 +66,25 @@
   }
 }
 
+@keyframes testimonial-marquee {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
 @layer utilities {
+  .animate-testimonials {
+    animation: testimonial-marquee 32s linear infinite;
+  }
+
+  .pause-on-hover:hover {
+    animation-play-state: paused;
+  }
+
   .text-indonesian-red {
     color: var(--indonesian-red);
   }
@@ -101,5 +119,11 @@
   
   .bg-light-grey {
     background-color: var(--light-grey);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-testimonials {
+    animation: none;
   }
 }

@@ -165,7 +165,7 @@ export class MemStorage implements IStorage {
 
   async getRecipeCoverageSummaries(): Promise<RecipeCoverageSummary[]> {
     const counts = new Map<number, number>();
-    for (const recipe of this.recipes.values()) {
+    for (const recipe of Array.from(this.recipes.values())) {
       counts.set(recipe.menuItemId, (counts.get(recipe.menuItemId) ?? 0) + 1);
     }
     return Array.from(counts.entries()).map(([menuItemId, ingredientCount]) => ({ menuItemId, ingredientCount }));
@@ -285,14 +285,7 @@ export const getStorage = (): IStorage => {
   }
 
   // Use SupabaseStorage if SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are provided, otherwise fallback to MemStorage
-  const useSupabase = process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-  // Log which storage implementation is being used
-  console.log('Environment variables when initializing storage:', {
-    SUPABASE_URL: process.env.SUPABASE_URL,
-    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY ? '[REDACTED]' : undefined,
-    useSupabase
-  });
+  const useSupabase = Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
 
   // Initialize the appropriate storage implementation
   storageInstance = useSupabase ? new SupabaseStorage() : new MemStorage();

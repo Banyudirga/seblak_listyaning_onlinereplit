@@ -1,6 +1,10 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "");
+// In local development, use the same Express server origin to avoid CORS
+// and keep Vite/Express middleware working as one app.
+const API_BASE_URL = import.meta.env.DEV
+  ? ""
+  : (import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "");
 
 export function getApiUrl(url: string) {
   if (/^https?:\/\//.test(url)) return url;

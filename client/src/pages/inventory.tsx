@@ -55,8 +55,6 @@ export default function Inventory() {
           reader.onload = () => resolve(reader.result as string);
           reader.readAsDataURL(data.image as File);
         });
-        
-        console.log("File converted to base64 for storage");
       }
       
       // Create the menu item data with the processed image

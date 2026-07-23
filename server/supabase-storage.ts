@@ -239,7 +239,7 @@ private async getRequiredSupplyUsage(order: Order) {
 private async deductStockForOrder(order: Order): Promise<void> {
   const usage = await this.getRequiredSupplyUsage(order);
 
-  for (const [supplyId, required] of usage.entries()) {
+  for (const [supplyId, required] of Array.from(usage.entries())) {
     const { data: supply, error } = await supabase.from('supplies').select('*').eq('id', supplyId).single();
     if (error || !supply) throw new Error(`Supply #${supplyId} not found`);
     if (supply.stock_quantity < required) throw new Error(`Not enough stock for ${supply.name}`);

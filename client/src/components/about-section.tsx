@@ -1,10 +1,13 @@
+import { useState } from "react";
 import { Clock, Truck } from "lucide-react";
 
 export default function AboutSection() {
+  const [showImage, setShowImage] = useState(true);
+
   return (
     <section className="py-16 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+        <div className={`grid grid-cols-1 gap-12 items-center ${showImage ? "md:grid-cols-2" : ""}`}>
           <div>
             <h2 className="text-3xl md:text-4xl font-bold text-dark-grey mb-6">
               Tentang Seblak Listyaning
@@ -35,14 +38,17 @@ export default function AboutSection() {
               </div>
             </div>
           </div>
-          <div className="relative">
-            <img 
-              src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600" 
-              alt="Dapur Seblak Listyaning" 
-              className="rounded-2xl shadow-xl w-full h-auto"
-            />
-            <div className="absolute inset-0 bg-indonesian-red bg-opacity-10 rounded-2xl"></div>
-          </div>
+          {showImage ? (
+            <div className="relative">
+              <img
+                src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600"
+                alt="Dapur Seblak Listyaning"
+                className="rounded-2xl shadow-xl w-full h-auto"
+                onError={() => setShowImage(false)}
+              />
+              <div className="absolute inset-0 rounded-2xl bg-indonesian-red/10"></div>
+            </div>
+          ) : null}
         </div>
       </div>
     </section>
