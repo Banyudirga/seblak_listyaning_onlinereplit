@@ -1,3 +1,7 @@
+import { Pencil } from "lucide-react";
+
+import { formatRupiah } from "@/lib/format";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,6 +13,7 @@ type SuppliesTabProps = {
   filteredSupplies: Supply[];
   supplySearch: string;
   onSupplySearchChange: (value: string) => void;
+  onEditSupply: (supply: Supply) => void;
 };
 
 export function SuppliesTab({
@@ -16,6 +21,7 @@ export function SuppliesTab({
   filteredSupplies,
   supplySearch,
   onSupplySearchChange,
+  onEditSupply,
 }: SuppliesTabProps) {
   return (
     <Card>
@@ -41,9 +47,12 @@ export function SuppliesTab({
               <TableHead>Nama</TableHead>
               <TableHead>Satuan</TableHead>
               <TableHead>Stok</TableHead>
+              <TableHead>Konversi default</TableHead>
+              <TableHead>Harga jual default</TableHead>
               <TableHead>Batas minimum</TableHead>
               <TableHead>Supplier</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead className="text-right">Aksi</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -52,6 +61,8 @@ export function SuppliesTab({
                 <TableCell className="font-medium">{supply.name}</TableCell>
                 <TableCell>{supply.unit}</TableCell>
                 <TableCell>{supply.stockQuantity} {supply.unit}</TableCell>
+                <TableCell>1 {supply.defaultPurchaseUnit} = {supply.defaultBaseUnitsPerPurchaseUnit} {supply.unit}</TableCell>
+                <TableCell>{formatRupiah(supply.defaultSalePricePerUnit ?? 0)}</TableCell>
                 <TableCell>{supply.lowStockThreshold} {supply.unit}</TableCell>
                 <TableCell>{supply.supplierName || "-"}</TableCell>
                 <TableCell>
@@ -59,11 +70,17 @@ export function SuppliesTab({
                     {supply.stockQuantity <= supply.lowStockThreshold ? "Stok menipis" : "Aman"}
                   </Badge>
                 </TableCell>
+                <TableCell className="text-right">
+                  <Button size="sm" variant="outline" onClick={() => onEditSupply(supply)}>
+                    <Pencil className="mr-2 h-4 w-4" />
+                    Edit
+                  </Button>
+                </TableCell>
               </TableRow>
             ))}
             {filteredSupplies.length === 0 && (
               <TableRow>
-                <TableCell colSpan={6} className="text-center text-gray-500 py-10">
+                <TableCell colSpan={9} className="text-center text-gray-500 py-10">
                   {supplies.length === 0
                     ? "Belum ada barang. Tambahkan bahan pertama untuk mulai memantau stok."
                     : "Tidak ada barang yang cocok dengan pencarian Anda."}

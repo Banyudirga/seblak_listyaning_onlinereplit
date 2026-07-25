@@ -16,6 +16,7 @@ export class SupabaseStorage implements IStorage {
       unit: data.unit,
       defaultPurchaseUnit: data.default_purchase_unit,
       defaultBaseUnitsPerPurchaseUnit: data.default_base_units_per_purchase_unit,
+      defaultSalePricePerUnit: data.default_sale_price_per_unit ?? 0,
       stockQuantity: data.stock_quantity,
       lowStockThreshold: data.low_stock_threshold,
       supplierName: data.supplier_name,
@@ -369,6 +370,7 @@ async updateOrderStatus(id: number, status: string): Promise<Order | undefined> 
       unit: supply.unit,
       default_purchase_unit: supply.defaultPurchaseUnit,
       default_base_units_per_purchase_unit: supply.defaultBaseUnitsPerPurchaseUnit,
+      default_sale_price_per_unit: supply.defaultSalePricePerUnit,
       stock_quantity: supply.stockQuantity,
       low_stock_threshold: supply.lowStockThreshold,
       supplier_name: supply.supplierName,
@@ -383,15 +385,56 @@ async updateOrderStatus(id: number, status: string): Promise<Order | undefined> 
       .select('*')
       .single();
 
-    if (result.error && /image_url|column/i.test(result.error.message)) {
+    if (result.error && /image_url|default_sale_price_per_unit|column/i.test(result.error.message)) {
       result = await supabase
         .from('supplies')
-        .insert(baseInsert)
+        .insert({
+          ...baseInsert,
+          default_sale_price_per_unit: undefined,
+        })
         .select('*')
         .single();
     }
 
     if (result.error) throw new Error(`Failed to create supply: ${result.error.message}`);
+    return this.mapSupply(result.data);
+  }
+
+  async updateSupply(id: number, supply: InsertSupply): Promise<Supply | undefined> {
+    const baseUpdate = {
+      name: supply.name,
+      unit: supply.unit,
+      default_purchase_unit: supply.defaultPurchaseUnit,
+      default_base_units_per_purchase_unit: supply.defaultBaseUnitsPerPurchaseUnit,
+      default_sale_price_per_unit: supply.defaultSalePricePerUnit,
+      stock_quantity: supply.stockQuantity,
+      low_stock_threshold: supply.lowStockThreshold,
+      supplier_name: supply.supplierName,
+    };
+
+    let result = await supabase
+      .from('supplies')
+      .update({
+        ...baseUpdate,
+        image_url: supply.imageUrl,
+      })
+      .eq('id', id)
+      .select('*')
+      .single();
+
+    if (result.error && /image_url|default_sale_price_per_unit|column/i.test(result.error.message)) {
+      result = await supabase
+        .from('supplies')
+        .update({
+          ...baseUpdate,
+          default_sale_price_per_unit: undefined,
+        })
+        .eq('id', id)
+        .select('*')
+        .single();
+    }
+
+    if (result.error) throw new Error(`Failed to update supply: ${result.error.message}`);
     return this.mapSupply(result.data);
   }
 

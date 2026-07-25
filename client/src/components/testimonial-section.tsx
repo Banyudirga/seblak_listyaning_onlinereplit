@@ -1,4 +1,11 @@
+import { useEffect, useState } from "react";
 import { Star } from "lucide-react";
+import {
+  Carousel,
+  type CarouselApi,
+  CarouselContent,
+  CarouselItem,
+} from "@/components/ui/carousel";
 
 const testimonials = [
   {
@@ -24,9 +31,37 @@ const testimonials = [
   },
 ];
 
-const scrollingTestimonials = [...testimonials, ...testimonials];
-
 export default function TestimonialSection() {
+  const [api, setApi] = useState<CarouselApi>();
+  const [paused, setPaused] = useState(false);
+
+  useEffect(() => {
+    if (!api) return;
+
+    const handlePointerDown = () => setPaused(true);
+    const handlePointerUp = () => setPaused(false);
+
+    api.on("pointerDown", handlePointerDown);
+    api.on("pointerUp", handlePointerUp);
+
+    return () => {
+      api.off("pointerDown", handlePointerDown);
+      api.off("pointerUp", handlePointerUp);
+    };
+  }, [api]);
+
+  useEffect(() => {
+    if (!api || paused) return;
+
+    const interval = window.setInterval(() => {
+      api.scrollNext();
+    }, 4500);
+
+    return () => {
+      window.clearInterval(interval);
+    };
+  }, [api, paused]);
+
   return (
     <section className="bg-white py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -47,45 +82,63 @@ export default function TestimonialSection() {
           </p>
         </div>
 
-        <div className="relative overflow-hidden">
+        <div
+          className="relative overflow-hidden"
+          onMouseEnter={() => setPaused(true)}
+          onMouseLeave={() => setPaused(false)}
+        >
           <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-10 bg-gradient-to-r from-white to-transparent" />
           <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-gradient-to-l from-white to-transparent" />
 
-          <div className="animate-testimonials pause-on-hover flex w-max gap-6 py-2">
-            {scrollingTestimonials.map((testimonial, index) => (
-              <article
-                key={`${testimonial.name}-${index}`}
-                className="flex min-h-[280px] w-[320px] flex-col rounded-[32px] border border-gray-200 bg-white p-6 shadow-sm sm:w-[360px]"
-              >
-                <div className="mb-5 flex items-center gap-2 text-[#f4b400]">
-                  {Array.from({ length: 5 }).map((_, starIndex) => (
-                    <Star
-                      key={`${testimonial.name}-star-${starIndex}`}
-                      className="h-5 w-5 fill-current"
-                    />
-                  ))}
-                </div>
+          <Carousel
+            setApi={setApi}
+            opts={{
+              loop: true,
+              align: "start",
+              dragFree: true,
+            }}
+            className="py-2"
+          >
+            <CarouselContent className="-ml-6">
+              {testimonials.map((testimonial) => (
+                <CarouselItem
+                  key={testimonial.name}
+                  className="basis-[320px] pl-6 sm:basis-[360px]"
+                >
+                  <article className="flex min-h-[280px] w-full flex-col rounded-[32px] border border-gray-200 bg-white p-6 shadow-sm">
+                    <div className="mb-5 flex items-center gap-2 text-[#f4b400]">
+                      {Array.from({ length: 5 }).map((_, starIndex) => (
+                        <Star
+                          key={`${testimonial.name}-star-${starIndex}`}
+                          className="h-5 w-5 fill-current"
+                        />
+                      ))}
+                    </div>
 
-                <p className="flex-1 text-base leading-7 text-gray-700">
-                  "{testimonial.quote}"
-                </p>
-
-                <div className="my-5 h-px bg-gray-200" />
-
-                <div className="flex items-center gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-indonesian-red/10 text-sm font-semibold text-indonesian-red">
-                    {testimonial.initials}
-                  </div>
-                  <div>
-                    <p className="font-semibold text-dark-grey">
-                      {testimonial.name}
+                    <p className="flex-1 text-base leading-7 text-gray-700">
+                      "{testimonial.quote}"
                     </p>
-                    <p className="text-sm text-gray-500">{testimonial.source}</p>
-                  </div>
-                </div>
-              </article>
-            ))}
-          </div>
+
+                    <div className="my-5 h-px bg-gray-200" />
+
+                    <div className="flex items-center gap-4">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-indonesian-red/10 text-sm font-semibold text-indonesian-red">
+                        {testimonial.initials}
+                      </div>
+                      <div>
+                        <p className="font-semibold text-dark-grey">
+                          {testimonial.name}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          {testimonial.source}
+                        </p>
+                      </div>
+                    </div>
+                  </article>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+          </Carousel>
         </div>
       </div>
     </section>

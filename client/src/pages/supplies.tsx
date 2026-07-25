@@ -14,12 +14,14 @@ import { RecipesTab } from "@/components/supplies/recipes-tab";
 import { RecordPurchaseDialog } from "@/components/supplies/record-purchase-dialog";
 import { ReportsTab } from "@/components/supplies/reports-tab";
 import { SuppliesTab } from "@/components/supplies/supplies-tab";
+import type { SupplyForm } from "@/components/supplies/supplies-types";
 
 
 export default function SuppliesPage() {
   const [isAddSupplyOpen, setIsAddSupplyOpen] = useState(false);
   const [isPurchaseOpen, setIsPurchaseOpen] = useState(false);
   const [editingMenuItem, setEditingMenuItem] = useState<MenuItem | null>(null);
+  const [editingSupply, setEditingSupply] = useState<SupplyForm | null>(null);
   const [supplySearch, setSupplySearch] = useState("");
   const [recipeSearch, setRecipeSearch] = useState("");
 
@@ -41,13 +43,17 @@ export default function SuppliesPage() {
     supplyById,
     refreshAll,
     addSupplyMutation,
+    updateSupplyMutation,
     addPurchaseMutation,
     saveRecipeMutation,
   } = useSuppliesPage({
     editingMenuItem,
     supplySearch,
     recipeSearch,
-    onAddSupplySuccess: () => setIsAddSupplyOpen(false),
+    onAddSupplySuccess: () => {
+      setIsAddSupplyOpen(false);
+      setEditingSupply(null);
+    },
     onAddPurchaseSuccess: () => setIsPurchaseOpen(false),
     onRecipeSaveSuccess: () => setEditingMenuItem(null),
   });
@@ -94,6 +100,22 @@ export default function SuppliesPage() {
               filteredSupplies={filteredSupplies}
               supplySearch={supplySearch}
               onSupplySearchChange={setSupplySearch}
+              onEditSupply={(supply) => {
+                setEditingSupply({
+                  id: supply.id,
+                  name: supply.name,
+                  imageUrl: supply.imageUrl ?? "",
+                  imageFile: null,
+                  unit: supply.unit,
+                  defaultPurchaseUnit: supply.defaultPurchaseUnit,
+                  defaultBaseUnitsPerPurchaseUnit: String(supply.defaultBaseUnitsPerPurchaseUnit),
+                  defaultSalePricePerUnit: String(supply.defaultSalePricePerUnit ?? 0),
+                  stockQuantity: String(supply.stockQuantity),
+                  lowStockThreshold: String(supply.lowStockThreshold),
+                  supplierName: supply.supplierName ?? "",
+                });
+                setIsAddSupplyOpen(true);
+              }}
             />
           </TabsContent>
 
@@ -119,9 +141,21 @@ export default function SuppliesPage() {
 
       <AddSupplyDialog
         open={isAddSupplyOpen}
-        onClose={() => setIsAddSupplyOpen(false)}
-        onSubmit={(form) => addSupplyMutation.mutate(form)}
-        isSubmitting={addSupplyMutation.isPending}
+        onClose={() => {
+          setIsAddSupplyOpen(false);
+          setEditingSupply(null);
+        }}
+        onSubmit={(form) => {
+          if (editingSupply?.id) {
+            updateSupplyMutation.mutate(form);
+            return;
+          }
+
+          addSupplyMutation.mutate(form);
+        }}
+        isSubmitting={addSupplyMutation.isPending || updateSupplyMutation.isPending}
+        initialForm={editingSupply}
+        mode={editingSupply ? "edit" : "create"}
       />
 
       <RecordPurchaseDialog

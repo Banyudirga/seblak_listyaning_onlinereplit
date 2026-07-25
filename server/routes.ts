@@ -300,6 +300,26 @@ const createSupply = async (req: Request, res: Response) => {
   }
 };
 
+const updateSupply = async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id);
+    const validatedSupply = insertSupplySchema.parse(req.body);
+    const supply = await storage.updateSupply(id, validatedSupply);
+
+    if (!supply) {
+      return res.status(404).json({ message: "Barang tidak ditemukan" });
+    }
+
+    res.json(supply);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ message: "Invalid supply data", errors: error.errors });
+    } else {
+      res.status(500).json({ message: error instanceof Error ? error.message : "Failed to update supply" });
+    }
+  }
+};
+
 const uploadSupplyImage = async (req: Request, res: Response) => {
   try {
     if (!req.file) return res.status(400).json({ message: "Image file is required" });
@@ -412,6 +432,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/admin/supplies", getAllSupplies);
   app.post("/api/admin/uploads/supply-image", supplyImageUpload.single("file"), uploadSupplyImage);
   app.post("/api/admin/supplies", createSupply);
+  app.patch("/api/admin/supplies/:id", updateSupply);
   app.get("/api/admin/supply-purchases", getAllSupplyPurchases);
   app.post("/api/admin/supply-purchases", createSupplyPurchase);
   app.get("/api/admin/stock-movements", getStockMovements);

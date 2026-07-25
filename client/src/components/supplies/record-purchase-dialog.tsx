@@ -1,7 +1,7 @@
 import { type FormEvent, useEffect, useState } from "react";
 
 import { formatRupiah } from "@/lib/format";
-import { COMMON_UNIT_SUGGESTIONS, getSuggestedConversion, type PurchaseForm } from "@/components/supplies/supplies-types";
+import { type PurchaseForm } from "@/components/supplies/supplies-types";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -43,7 +43,7 @@ export function RecordPurchaseDialog({
         supplyId: firstSupply ? String(firstSupply.id) : "",
         quantity: "1",
         purchaseUnit: defaultUnit,
-        baseUnitsPerPurchaseUnit: String(firstSupply?.defaultBaseUnitsPerPurchaseUnit ?? getSuggestedConversion(defaultUnit, firstSupply?.unit ?? defaultUnit) ?? 1),
+        baseUnitsPerPurchaseUnit: String(firstSupply?.defaultBaseUnitsPerPurchaseUnit ?? 1),
         unitCost: "0",
         supplierName: "",
         notes: "",
@@ -63,18 +63,6 @@ export function RecordPurchaseDialog({
       supplierName: supply?.supplierName ?? current.supplierName,
     }));
   };
-
-  useEffect(() => {
-    if (!selectedSupply) return;
-    if (form.purchaseUnit === selectedSupply.defaultPurchaseUnit) {
-      setForm((current) => ({ ...current, baseUnitsPerPurchaseUnit: String(selectedSupply.defaultBaseUnitsPerPurchaseUnit) }));
-      return;
-    }
-    const suggested = getSuggestedConversion(form.purchaseUnit, selectedSupply.unit);
-    if (suggested !== null) {
-      setForm((current) => ({ ...current, baseUnitsPerPurchaseUnit: String(suggested) }));
-    }
-  }, [form.purchaseUnit, selectedSupply]);
 
   const quantity = Number(form.quantity || 0);
   const baseUnitsPerPurchaseUnit = Number(form.baseUnitsPerPurchaseUnit || 0);
@@ -131,24 +119,33 @@ export function RecordPurchaseDialog({
             </div>
           )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="space-y-2">
+            <Label>Jumlah pembelian</Label>
             <Input type="number" inputMode="numeric" placeholder="Jumlah unit yang dibeli" value={form.quantity} onChange={(e) => setForm({ ...form, quantity: e.target.value })} />
-            <Input list="purchase-unit-suggestions" placeholder="Satuan beli, mis. box, bungkus, pack" value={form.purchaseUnit} onChange={(e) => setForm({ ...form, purchaseUnit: e.target.value })} />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label>Nilai konversi</Label>
-              <Input
-                type="number"
-                inputMode="numeric"
-                placeholder={`Berapa ${selectedSupply?.unit ?? "satuan dasar"} dalam 1 ${form.purchaseUnit}`}
-                value={form.baseUnitsPerPurchaseUnit}
-                onChange={(e) => setForm({ ...form, baseUnitsPerPurchaseUnit: e.target.value })}
-              />
+              <Label>Satuan beli default</Label>
+              <Input value={selectedSupply?.defaultPurchaseUnit ?? "-"} readOnly className="bg-muted" />
             </div>
             <div className="space-y-2">
-              <Label>Harga satuan</Label>
+              <Label>Nilai konversi default</Label>
+              <Input
+                value={selectedSupply ? `1 ${selectedSupply.defaultPurchaseUnit} = ${selectedSupply.defaultBaseUnitsPerPurchaseUnit} ${selectedSupply.unit}` : "-"}
+                readOnly
+                className="bg-muted"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <Label>Harga jual default per unit</Label>
+              <Input value={selectedSupply ? formatRupiah(selectedSupply.defaultSalePricePerUnit ?? 0) : formatRupiah(0)} readOnly className="bg-muted" />
+            </div>
+            <div className="space-y-2">
+              <Label>Harga beli satuan</Label>
               <Input
                 type="number"
                 inputMode="numeric"
@@ -166,16 +163,9 @@ export function RecordPurchaseDialog({
 
           {selectedSupply && (
             <div className="rounded-md border border-dashed p-3 text-sm text-muted-foreground">
-              {form.purchaseUnit === selectedSupply.defaultPurchaseUnit
-                ? `Default barang: 1 ${selectedSupply.defaultPurchaseUnit} = ${selectedSupply.defaultBaseUnitsPerPurchaseUnit} ${selectedSupply.unit}`
-                : getSuggestedConversion(form.purchaseUnit, selectedSupply.unit) !== null
-                  ? `Preset diterapkan: 1 ${form.purchaseUnit} = ${getSuggestedConversion(form.purchaseUnit, selectedSupply.unit)} ${selectedSupply.unit}`
-                  : `Konversi manual: isi berapa ${selectedSupply.unit} di dalam 1 ${form.purchaseUnit}`}
+              Nilai konversi dan harga jual default hanya bisa diubah dari form barang agar pembelian dan penjualan tetap konsisten.
             </div>
           )}
-          <datalist id="purchase-unit-suggestions">
-            {Array.from(new Set([selectedSupply?.defaultPurchaseUnit ?? "", selectedSupply?.unit ?? "", ...COMMON_UNIT_SUGGESTIONS])).filter(Boolean).map((unit) => <option key={unit} value={unit} />)}
-          </datalist>
 
           <Input
             placeholder="Nama supplier"

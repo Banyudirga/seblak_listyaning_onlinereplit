@@ -17,6 +17,7 @@ export interface IStorage {
   updateMenuItemAvailability(id: number, isAvailable: number): Promise<MenuItem | undefined>;
   getAllSupplies(): Promise<Supply[]>;
   createSupply(supply: InsertSupply): Promise<Supply>;
+  updateSupply(id: number, supply: InsertSupply): Promise<Supply | undefined>;
   createSupplyPurchase(purchase: InsertSupplyPurchase): Promise<SupplyPurchase>;
   getAllSupplyPurchases(): Promise<SupplyPurchase[]>;
   getSupplyStockMovements(): Promise<SupplyStockMovement[]>;
@@ -107,6 +108,7 @@ export class MemStorage implements IStorage {
       unit: supply.unit ?? "pcs",
       defaultPurchaseUnit: supply.defaultPurchaseUnit ?? supply.unit ?? "pcs",
       defaultBaseUnitsPerPurchaseUnit: supply.defaultBaseUnitsPerPurchaseUnit ?? 1,
+      defaultSalePricePerUnit: supply.defaultSalePricePerUnit ?? 0,
       stockQuantity: supply.stockQuantity ?? 0,
       lowStockThreshold: supply.lowStockThreshold ?? 0,
       supplierName: supply.supplierName ?? null,
@@ -114,6 +116,27 @@ export class MemStorage implements IStorage {
     };
     this.supplies.set(newSupply.id, newSupply);
     return newSupply;
+  }
+
+  async updateSupply(id: number, supply: InsertSupply): Promise<Supply | undefined> {
+    const existingSupply = this.supplies.get(id);
+    if (!existingSupply) return undefined;
+
+    const updatedSupply: Supply = {
+      ...existingSupply,
+      name: supply.name,
+      imageUrl: supply.imageUrl ?? null,
+      unit: supply.unit ?? existingSupply.unit,
+      defaultPurchaseUnit: supply.defaultPurchaseUnit ?? supply.unit ?? existingSupply.defaultPurchaseUnit,
+      defaultBaseUnitsPerPurchaseUnit: supply.defaultBaseUnitsPerPurchaseUnit ?? existingSupply.defaultBaseUnitsPerPurchaseUnit,
+      defaultSalePricePerUnit: supply.defaultSalePricePerUnit ?? existingSupply.defaultSalePricePerUnit,
+      stockQuantity: supply.stockQuantity ?? existingSupply.stockQuantity,
+      lowStockThreshold: supply.lowStockThreshold ?? existingSupply.lowStockThreshold,
+      supplierName: supply.supplierName ?? null,
+    };
+
+    this.supplies.set(id, updatedSupply);
+    return updatedSupply;
   }
 
   async createSupplyPurchase(purchase: InsertSupplyPurchase): Promise<SupplyPurchase> {

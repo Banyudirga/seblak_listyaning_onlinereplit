@@ -1,0 +1,11 @@
+name,unit,default_purchase_unit,default_base_units_per_purchase_unit,default_sale_price_per_unit,stock_quantity,low_stock_threshold,supplier_name
+Kerupuk,pcs,pack,20,1000,100,20,Toko Sembako Jaya
+Sosis,pcs,box,24,3000,48,12,Distributor Frozen Food
+Cabai Bubuk,gram,bungkus,100,150,500,100,Toko Bumbu Nusantara
+Mie,pcs,kardus,40,2500,80,20,Distributor Makanan
+Ceker,pcs,pack,10,4000,30,5,Pasar Induk
+Bakso,pcs,pack,25,2000,50,10,Distributor Bakso
+Sawi Hijau,gram,ikat,250,40,1000,200,Pasar Sayur Segar
+Kencur,gram,pack,200,60,400,100,Toko Bumbu Nusantara
+Makaroni,gram,pack,500,50,1500,300,Distributor Cemilan
+Telur,pcs,tray,30,2500,60,15,Toko Sembako Jaya

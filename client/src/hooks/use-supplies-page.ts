@@ -110,6 +110,7 @@ export function useSuppliesPage({
         unit: form.unit.trim(),
         defaultPurchaseUnit: form.defaultPurchaseUnit.trim(),
         defaultBaseUnitsPerPurchaseUnit: Number(form.defaultBaseUnitsPerPurchaseUnit),
+        defaultSalePricePerUnit: Number(form.defaultSalePricePerUnit),
         stockQuantity: Number(form.stockQuantity),
         lowStockThreshold: Number(form.lowStockThreshold),
         supplierName: form.supplierName || null,
@@ -127,6 +128,45 @@ export function useSuppliesPage({
       toast({
         title: "Terjadi kesalahan",
         description: error.message || "Gagal menambahkan barang.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const updateSupplyMutation = useMutation({
+    mutationFn: async (form: SupplyForm) => {
+      if (!form.id) {
+        throw new Error("ID barang tidak ditemukan.");
+      }
+
+      const imageUrl = form.imageFile
+        ? await uploadSupplyImage(form.imageFile)
+        : form.imageUrl.trim() || undefined;
+
+      return apiRequest("PATCH", `/api/admin/supplies/${form.id}`, {
+        name: form.name,
+        imageUrl,
+        unit: form.unit.trim(),
+        defaultPurchaseUnit: form.defaultPurchaseUnit.trim(),
+        defaultBaseUnitsPerPurchaseUnit: Number(form.defaultBaseUnitsPerPurchaseUnit),
+        defaultSalePricePerUnit: Number(form.defaultSalePricePerUnit),
+        stockQuantity: Number(form.stockQuantity),
+        lowStockThreshold: Number(form.lowStockThreshold),
+        supplierName: form.supplierName || null,
+      });
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["/api/admin/supplies"] });
+      onAddSupplySuccess();
+      toast({
+        title: "Barang diperbarui",
+        description: "Perubahan barang berhasil disimpan.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Terjadi kesalahan",
+        description: error.message || "Gagal memperbarui barang.",
         variant: "destructive",
       });
     },
@@ -233,6 +273,7 @@ export function useSuppliesPage({
     supplyById,
     refreshAll,
     addSupplyMutation,
+    updateSupplyMutation,
     addPurchaseMutation,
     saveRecipeMutation,
   };

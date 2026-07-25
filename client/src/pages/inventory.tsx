@@ -151,36 +151,53 @@ export default function Inventory() {
   return (
     <div className="min-h-screen bg-light-grey">
       {/* Header */}
-      <div className="bg-indonesian-red text-white p-6">
+      <div className="bg-indonesian-red text-white">
         <div className="max-w-7xl mx-auto">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-2xl font-bold">Manajemen inventaris</h1>
-              <p className="text-red-100">Kelola Stok Menu</p>
-              <Link href="/admin" className="inline-block mt-1">
-                <Button variant="outline" size="sm" className="text-indonesian-red border-white hover:bg-white text-xs py-1 h-auto">
-                  <ArrowLeft className="h-3 w-3 mr-1" />
-                  Kembali ke Admin
+          <div className="rounded-b-[28px] bg-indonesian-red px-4 py-5 sm:px-6 sm:py-6">
+            <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+              <div className="min-w-0">
+                <Link href="/admin" className="inline-block">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="mb-4 h-9 border-white/80 bg-white text-indonesian-red hover:bg-white/90"
+                  >
+                    <ArrowLeft className="mr-2 h-4 w-4" />
+                    Kembali ke Admin
+                  </Button>
+                </Link>
+
+                <div className="space-y-2">
+                  <p className="text-xs font-medium uppercase tracking-[0.25em] text-red-100">
+                    Inventaris
+                  </p>
+                  <h1 className="max-w-xl text-2xl font-bold leading-tight sm:text-3xl">
+                    Manajemen Inventaris
+                  </h1>
+                  <p className="max-w-md text-sm leading-6 text-red-100 sm:text-base">
+                    Pantau stok menu, tambah item baru, dan perbarui ketersediaan dengan lebih nyaman di mobile.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:min-w-[320px]">
+                <Button
+                  onClick={() => setIsAddMenuOpen(true)}
+                  variant="outline"
+                  className="h-11 w-full border-white bg-white text-indonesian-red hover:bg-white/90"
+                >
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Tambah menu
                 </Button>
-              </Link>
-            </div>
-            <div className="flex gap-2">
-              <Button 
-                onClick={() => setIsAddMenuOpen(true)}
-                variant="outline" 
-                className="text-indonesian-red border-white hover:bg-white"
-              >
-                <PlusCircle className="h-4 w-4 mr-2" />
-                Tambah menu
-              </Button>
-              <Button 
-                onClick={() => refetch()}
-                variant="outline" 
-                className="text-indonesian-red border-white hover:bg-white"
-              >
-                <Package className="h-4 w-4 mr-2" />
-                Muat ulang
-              </Button>
+                <Button
+                  onClick={() => refetch()}
+                  variant="outline"
+                  className="h-11 w-full border-white bg-white text-indonesian-red hover:bg-white/90"
+                >
+                  <Package className="mr-2 h-4 w-4" />
+                  Muat ulang
+                </Button>
+              </div>
             </div>
           </div>
         </div>

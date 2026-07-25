@@ -128,54 +128,71 @@ export default function Admin() {
   return (
     <div className="min-h-screen bg-light-grey">
       {/* Header */}
-      <div className="bg-indonesian-red text-white p-6">
+      <div className="bg-indonesian-red text-white">
         <div className="max-w-7xl mx-auto">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-2xl font-bold">Seblak Listyaning - Admin</h1>
-              <p className="text-red-100">Dashboard Pemilik Restoran</p>
-              <Link href="/" className="inline-block mt-1">
-                <Button variant="outline" size="sm" className="text-indonesian-red border-white hover:bg-white text-xs py-1 h-auto">
-                  <ArrowLeft className="h-3 w-3 mr-1" />
-                  Kembali
-                </Button>
-              </Link>
-            </div>
-            <div className="flex gap-3">
-              <Link href="/inventory">
-                <Button 
-                  variant="outline" 
-                  className="text-indonesian-red border-white hover:bg-white"
+          <div className="rounded-b-[28px] bg-indonesian-red px-4 py-5 sm:px-6 sm:py-6">
+            <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+              <div className="min-w-0">
+                <Link href="/" className="inline-block">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="mb-4 h-9 border-white/80 bg-white text-indonesian-red hover:bg-white/90"
+                  >
+                    <ArrowLeft className="mr-2 h-4 w-4" />
+                    Kembali
+                  </Button>
+                </Link>
+
+                <div className="space-y-2">
+                  <p className="text-xs font-medium uppercase tracking-[0.25em] text-red-100">
+                    Panel Admin
+                  </p>
+                  <h1 className="max-w-xl text-2xl font-bold leading-tight sm:text-3xl">
+                    Seblak Listyaning
+                  </h1>
+                  <p className="max-w-md text-sm leading-6 text-red-100 sm:text-base">
+                    Kelola pesanan, stok, dan barang dari satu dashboard yang lebih nyaman di mobile.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:max-w-[540px]">
+                <Link href="/inventory">
+                  <Button
+                    variant="outline"
+                    className="h-11 w-full border-white bg-white text-indonesian-red hover:bg-white/90"
+                  >
+                    <Package className="mr-2 h-4 w-4" />
+                    Inventaris
+                  </Button>
+                </Link>
+                <Link href="/supplies">
+                  <Button
+                    variant="outline"
+                    className="h-11 w-full border-white bg-white text-indonesian-red hover:bg-white/90"
+                  >
+                    <Warehouse className="mr-2 h-4 w-4" />
+                    Barang
+                  </Button>
+                </Link>
+                <Button
+                  onClick={() => refetch()}
+                  variant="outline"
+                  className="h-11 w-full border-white bg-white text-indonesian-red hover:bg-white/90"
                 >
-                  <Package className="h-4 w-4 mr-2" />
-                  Inventaris
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  Muat ulang
                 </Button>
-              </Link>
-              <Link href="/supplies">
-                <Button 
-                  variant="outline" 
-                  className="text-indonesian-red border-white hover:bg-white"
+                <Button
+                  onClick={handleLogout}
+                  variant="outline"
+                  className="h-11 w-full border-white bg-white text-indonesian-red hover:bg-white/90"
                 >
-                  <Warehouse className="h-4 w-4 mr-2" />
-                  Barang
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Keluar
                 </Button>
-              </Link>
-              <Button 
-                onClick={() => refetch()}
-                variant="outline" 
-                className="text-indonesian-red border-white hover:bg-white"
-              >
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Muat ulang
-              </Button>
-              <Button 
-                onClick={handleLogout}
-                variant="outline" 
-                className="text-indonesian-red border-white hover:bg-white"
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                Keluar
-              </Button>
+              </div>
             </div>
           </div>
         </div>

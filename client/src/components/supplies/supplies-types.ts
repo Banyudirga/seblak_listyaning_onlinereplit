@@ -4,12 +4,14 @@ export type RecipeCoverageSummary = {
 };
 
 export type SupplyForm = {
+  id?: number;
   name: string;
   imageUrl: string;
   imageFile: File | null;
   unit: string;
   defaultPurchaseUnit: string;
   defaultBaseUnitsPerPurchaseUnit: string;
+  defaultSalePricePerUnit: string;
   stockQuantity: string;
   lowStockThreshold: string;
   supplierName: string;
