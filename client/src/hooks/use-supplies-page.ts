@@ -4,7 +4,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, getApiUrl, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { PurchaseForm, RecipeCoverageSummary, RecipeDraft, SupplyForm } from "@/components/supplies/supplies-types";
-import type { MenuItem, MenuItemRecipe, Supply, SupplyPurchase, SupplyStockMovement } from "@shared/schema";
+import type { MenuItem, MenuItemRecipe, Supply, SupplyPurchase } from "@shared/schema";
 
 type UseSuppliesPageOptions = {
   editingMenuItem: MenuItem | null;
@@ -25,6 +25,13 @@ export function useSuppliesPage({
 }: UseSuppliesPageOptions) {
   const { toast } = useToast();
 
+  const invalidateReportQueries = () =>
+    queryClient.invalidateQueries({
+      predicate: (query) =>
+        typeof query.queryKey[0] === "string" &&
+        query.queryKey[0].startsWith("/api/admin/reports/"),
+    });
+
   const { data: supplies = [], isLoading: suppliesLoading } = useQuery<Supply[]>({
     queryKey: ["/api/admin/supplies"],
   });
@@ -39,10 +46,6 @@ export function useSuppliesPage({
 
   const { data: recipeCoverage = [] } = useQuery<RecipeCoverageSummary[]>({
     queryKey: ["/api/admin/recipes/summary"],
-  });
-
-  const { data: stockMovements = [] } = useQuery<SupplyStockMovement[]>({
-    queryKey: ["/api/admin/stock-movements"],
   });
 
   const { data: recipes = [], isLoading: recipesLoading } = useQuery<MenuItemRecipe[]>({
@@ -70,7 +73,11 @@ export function useSuppliesPage({
       queryClient.invalidateQueries({ queryKey: ["/api/admin/supplies"] }),
       queryClient.invalidateQueries({ queryKey: ["/api/admin/supply-purchases"] }),
       queryClient.invalidateQueries({ queryKey: ["/api/admin/inventory"] }),
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/stock-movements"] }),
+      queryClient.invalidateQueries({
+        predicate: (query) =>
+          typeof query.queryKey[0] === "string" &&
+          query.queryKey[0].startsWith("/api/admin/reports/"),
+      }),
     ]);
 
     toast({
@@ -117,7 +124,10 @@ export function useSuppliesPage({
       });
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["/api/admin/supplies"] });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["/api/admin/supplies"] }),
+        invalidateReportQueries(),
+      ]);
       onAddSupplySuccess();
       toast({
         title: "Barang ditambahkan",
@@ -156,7 +166,10 @@ export function useSuppliesPage({
       });
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["/api/admin/supplies"] });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["/api/admin/supplies"] }),
+        invalidateReportQueries(),
+      ]);
       onAddSupplySuccess();
       toast({
         title: "Barang diperbarui",
@@ -188,6 +201,7 @@ export function useSuppliesPage({
         queryClient.invalidateQueries({ queryKey: ["/api/admin/supplies"] }),
         queryClient.invalidateQueries({ queryKey: ["/api/admin/supply-purchases"] }),
         queryClient.invalidateQueries({ queryKey: ["/api/admin/stock-movements"] }),
+        invalidateReportQueries(),
       ]);
       onAddPurchaseSuccess();
       toast({
@@ -229,6 +243,7 @@ export function useSuppliesPage({
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["/api/admin/inventory"] });
       await queryClient.invalidateQueries({ queryKey: ["/api/admin/recipes/summary"] });
+      await invalidateReportQueries();
 
       if (editingMenuItem) {
         await queryClient.invalidateQueries({
@@ -255,7 +270,6 @@ export function useSuppliesPage({
     supplies,
     purchases,
     menuItems,
-    stockMovements,
     recipes,
     recipesLoading,
     suppliesLoading,

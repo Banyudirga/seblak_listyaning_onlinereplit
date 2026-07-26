@@ -5,6 +5,14 @@ import multer from "multer";
 import { nanoid } from "nanoid";
 import { storage } from "./storage";
 import { supabase } from "./supabase";
+import {
+  buildOverviewReport,
+  buildProfitEstimateReport,
+  buildPurchasesReport,
+  buildSalesReport,
+  buildStockReport,
+  type ReportDateRange,
+} from "./reporting";
 import { insertOrderSchema, insertMenuItemSchema, insertSupplySchema, insertSupplyPurchaseSchema, insertMenuItemRecipeSchema } from "@shared/schema";
 import { z } from "zod";
 
@@ -103,6 +111,35 @@ const requireAdminAuth = (req: Request, res: Response, next: NextFunction) => {
   if (hasValidAdminSession(req)) return next();
   return res.status(401).json({ message: "Akses admin memerlukan login." });
 };
+
+function parseDateParam(value: unknown, endExclusive = false) {
+  if (typeof value !== "string" || !value.trim()) return null;
+
+  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) return null;
+
+  const year = Number(match[1]);
+  const month = Number(match[2]) - 1;
+  const day = Number(match[3]);
+
+  if (endExclusive) {
+    return new Date(year, month, day + 1);
+  }
+
+  return new Date(year, month, day);
+}
+
+function getReportDateRange(req: Request): ReportDateRange {
+  const startDateText = typeof req.query.startDate === "string" ? req.query.startDate : undefined;
+  const endDateText = typeof req.query.endDate === "string" ? req.query.endDate : undefined;
+
+  return {
+    startDate: parseDateParam(startDateText),
+    endDate: parseDateParam(endDateText, true),
+    startDateText,
+    endDateText,
+  };
+}
 
 // --- Reusable Route Handlers ---
 
@@ -408,6 +445,46 @@ const replaceMenuItemRecipes = async (req: Request, res: Response) => {
   }
 };
 
+const getOverviewReport = async (req: Request, res: Response) => {
+  try {
+    res.json(await buildOverviewReport(storage, getReportDateRange(req)));
+  } catch (error) {
+    res.status(500).json({ message: error instanceof Error ? error.message : "Failed to fetch overview report" });
+  }
+};
+
+const getStockReport = async (req: Request, res: Response) => {
+  try {
+    res.json(await buildStockReport(storage, getReportDateRange(req)));
+  } catch (error) {
+    res.status(500).json({ message: error instanceof Error ? error.message : "Failed to fetch stock report" });
+  }
+};
+
+const getPurchasesReport = async (req: Request, res: Response) => {
+  try {
+    res.json(await buildPurchasesReport(storage, getReportDateRange(req)));
+  } catch (error) {
+    res.status(500).json({ message: error instanceof Error ? error.message : "Failed to fetch purchases report" });
+  }
+};
+
+const getSalesReport = async (req: Request, res: Response) => {
+  try {
+    res.json(await buildSalesReport(storage, getReportDateRange(req)));
+  } catch (error) {
+    res.status(500).json({ message: error instanceof Error ? error.message : "Failed to fetch sales report" });
+  }
+};
+
+const getProfitEstimateReport = async (req: Request, res: Response) => {
+  try {
+    res.json(await buildProfitEstimateReport(storage, getReportDateRange(req)));
+  } catch (error) {
+    res.status(500).json({ message: error instanceof Error ? error.message : "Failed to fetch profit estimate report" });
+  }
+};
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // --- Public API Routes ---
   app.get("/api/menu", getAllMenuItems);
@@ -430,6 +507,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/admin/inventory/:id", updateMenuItemStock);
   app.patch("/api/admin/inventory/:id/availability", updateMenuItemAvailability);
   app.get("/api/admin/supplies", getAllSupplies);
+  app.get("/api/admin/reports/overview", getOverviewReport);
+  app.get("/api/admin/reports/stock", getStockReport);
+  app.get("/api/admin/reports/purchases", getPurchasesReport);
+  app.get("/api/admin/reports/sales", getSalesReport);
+  app.get("/api/admin/reports/profit-estimate", getProfitEstimateReport);
   app.post("/api/admin/uploads/supply-image", supplyImageUpload.single("file"), uploadSupplyImage);
   app.post("/api/admin/supplies", createSupply);
   app.patch("/api/admin/supplies/:id", updateSupply);

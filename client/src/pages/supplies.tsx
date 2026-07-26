@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Activity, BookOpen, RefreshCw, ShoppingCart, Warehouse } from "lucide-react";
+import { BookOpen, RefreshCw, ShoppingCart, Warehouse } from "lucide-react";
 
 import { formatRupiah } from "@/lib/format";
 import { useSuppliesPage } from "@/hooks/use-supplies-page";
@@ -12,7 +12,6 @@ import { PurchasesTab } from "@/components/supplies/purchases-tab";
 import { RecipeEditorDialog } from "@/components/supplies/recipe-editor-dialog";
 import { RecipesTab } from "@/components/supplies/recipes-tab";
 import { RecordPurchaseDialog } from "@/components/supplies/record-purchase-dialog";
-import { ReportsTab } from "@/components/supplies/reports-tab";
 import { SuppliesTab } from "@/components/supplies/supplies-tab";
 import type { SupplyForm } from "@/components/supplies/supplies-types";
 
@@ -28,7 +27,6 @@ export default function SuppliesPage() {
   const {
     supplies,
     purchases,
-    stockMovements,
     recipes,
     recipesLoading,
     isPageLoading,
@@ -91,7 +89,6 @@ export default function SuppliesPage() {
             <TabsTrigger value="supplies"><Warehouse className="h-4 w-4 mr-2" />Barang</TabsTrigger>
             <TabsTrigger value="purchases"><ShoppingCart className="h-4 w-4 mr-2" />Pembelian</TabsTrigger>
             <TabsTrigger value="recipes"><BookOpen className="h-4 w-4 mr-2" />Resep</TabsTrigger>
-            <TabsTrigger value="reports"><Activity className="h-4 w-4 mr-2" />Laporan</TabsTrigger>
           </TabsList>
 
           <TabsContent value="supplies">
@@ -121,10 +118,6 @@ export default function SuppliesPage() {
 
           <TabsContent value="purchases">
             <PurchasesTab purchases={purchases} supplyById={supplyById} supplyNameById={supplyNameById} />
-          </TabsContent>
-
-          <TabsContent value="reports">
-            <ReportsTab lowStockSupplies={lowStockSupplies} stockMovements={stockMovements} supplyNameById={supplyNameById} />
           </TabsContent>
 
           <TabsContent value="recipes">

@@ -11,6 +11,7 @@ import Receipt from "@/pages/receipt";
 import Admin from "@/pages/admin";
 import Inventory from "@/pages/inventory";
 import Supplies from "@/pages/supplies";
+import Reports from "@/pages/reports";
 import AdminLogin from "@/pages/admin-login";
 import NotFound from "@/pages/not-found";
 
@@ -66,6 +67,7 @@ function ProtectedAdminRoute({ component: Component }: { component: ComponentTyp
 const ProtectedAdminPage = () => <ProtectedAdminRoute component={Admin} />;
 const ProtectedInventoryPage = () => <ProtectedAdminRoute component={Inventory} />;
 const ProtectedSuppliesPage = () => <ProtectedAdminRoute component={Supplies} />;
+const ProtectedReportsPage = () => <ProtectedAdminRoute component={Reports} />;
 
 function Router() {
   return (
@@ -77,6 +79,7 @@ function Router() {
       <Route path="/admin" component={ProtectedAdminPage} />
       <Route path="/inventory" component={ProtectedInventoryPage} />
       <Route path="/supplies" component={ProtectedSuppliesPage} />
+      <Route path="/reports" component={ProtectedReportsPage} />
       <Route component={NotFound} />
     </Switch>
   );

@@ -114,8 +114,24 @@ export function RecordPurchaseDialog({
           </Select>
 
           {selectedSupply && (
-            <div className="rounded-md bg-muted p-3 text-sm">
-              Stok saat ini: <span className="font-semibold">{selectedSupply.stockQuantity} {selectedSupply.unit}</span>
+            <div className="space-y-3">
+              <div className="overflow-hidden rounded-lg border bg-muted/30">
+                {selectedSupply.imageUrl ? (
+                  <img
+                    src={selectedSupply.imageUrl}
+                    alt={selectedSupply.name}
+                    className="h-40 w-full object-cover sm:h-44"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className="flex h-32 items-center justify-center bg-muted px-4 text-center text-sm text-muted-foreground sm:h-36">
+                    Belum ada gambar untuk barang ini.
+                  </div>
+                )}
+              </div>
+              <div className="rounded-md bg-muted p-3 text-sm">
+                Stok saat ini: <span className="font-semibold">{selectedSupply.stockQuantity} {selectedSupply.unit}</span>
+              </div>
             </div>
           )}
 

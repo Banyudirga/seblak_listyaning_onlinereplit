@@ -3,7 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FileText, RefreshCw, Package, ArrowLeft, Warehouse, LogOut } from "lucide-react";
+import { FileText, RefreshCw, Package, ArrowLeft, Warehouse, LogOut, BarChart3 } from "lucide-react";
 import { apiRequest, getApiUrl, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Link, useLocation } from "wouter";
@@ -157,7 +157,7 @@ export default function Admin() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:max-w-[540px]">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-5 lg:max-w-[680px]">
                 <Link href="/inventory">
                   <Button
                     variant="outline"
@@ -174,6 +174,15 @@ export default function Admin() {
                   >
                     <Warehouse className="mr-2 h-4 w-4" />
                     Barang
+                  </Button>
+                </Link>
+                <Link href="/reports">
+                  <Button
+                    variant="outline"
+                    className="h-11 w-full border-white bg-white text-indonesian-red hover:bg-white/90"
+                  >
+                    <BarChart3 className="mr-2 h-4 w-4" />
+                    Laporan
                   </Button>
                 </Link>
                 <Button
