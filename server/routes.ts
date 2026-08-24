@@ -68,13 +68,21 @@ function hasValidAdminSession(req: Request) {
 }
 
 function getAdminCookieOptions() {
-  const secure = process.env.NODE_ENV === "production";
+  const isLocalhost =
+    process.env.HOST?.includes("localhost") ||
+    process.env.RAILWAY_ENVIRONMENT === "local" ||
+    (!process.env.RAILWAY_STATIC_URL && !process.env.RAILWAY_PUBLIC_DOMAIN && process.env.NODE_ENV !== "production");
+
+  const secure = !isLocalhost;
+  const sameSite: "none" | "lax" = secure ? "none" : "lax";
+
   return {
     httpOnly: true,
     secure,
-    sameSite: secure ? "none" as const : "lax" as const,
+    sameSite,
     maxAge: ADMIN_SESSION_TTL_MS,
     path: "/",
+    ...(secure && { partitioned: true as const }),
   };
 }
 

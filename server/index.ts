@@ -26,16 +26,33 @@ if (process.env.NODE_ENV === 'production') {
   app.use((req, res, next) => {
     const origin = req.headers.origin;
 
-    if (origin && allowedOrigins.includes(origin)) {
-      res.setHeader('Access-Control-Allow-Origin', origin);
+    // Always set Vary: Origin so caches don't get confused between origins
+    res.setHeader('Vary', 'Origin');
+
+    if (origin) {
+      if (allowedOrigins.includes(origin)) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+      } else {
+        // Fallback: if no explicit CORS_ORIGIN set but request comes from browser,
+        // echo back origin (for dev/staging; production should set CORS_ORIGIN).
+        if (allowedOrigins.length === 0) {
+          res.setHeader('Access-Control-Allow-Origin', origin);
+        }
+      }
+    } else if (allowedOrigins.length === 0) {
+      // No origin header and no explicit allow-list (local curl, health checks)
+      res.setHeader('Access-Control-Allow-Origin', '*');
     }
 
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Expose-Headers', 'Set-Cookie');
 
     if (req.method === 'OPTIONS') {
-      return res.status(200).end();
+      // Set cookie-related headers for preflight as well
+      res.setHeader('Access-Control-Max-Age', '86400');
+      return res.status(204).end();
     }
 
     next();
