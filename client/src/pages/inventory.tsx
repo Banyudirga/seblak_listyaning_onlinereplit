@@ -118,7 +118,7 @@ export default function Inventory() {
   });
 
   const filteredItems = menuItems.filter((item: MenuItem) => 
-    selectedCategory === "all" || item.category === selectedCategory
+    selectedCategory === "all" || (item.category && item.category.toLowerCase() === selectedCategory.toLowerCase())
   );
 
   const inventoryStats = calculateInventoryStats(menuItems);
@@ -259,7 +259,7 @@ export default function Inventory() {
               <SelectItem value="cemilan">Cemilan</SelectItem>
               {/* Add any unique categories from existing menu items that aren't in the predefined list */}
               {Array.from(new Set(menuItems.map(item => item.category)))
-                .filter(cat => !['seblak', 'prasmanan', 'makanan', 'minuman', 'cemilan', 'all'].includes(cat))
+                .filter(cat => cat && !['seblak', 'prasmanan', 'makanan', 'minuman', 'cemilan', 'all'].includes(cat.toLowerCase()))
                 .map(category => (
                   <SelectItem key={category} value={category}>
                     {category.charAt(0).toUpperCase() + category.slice(1)}

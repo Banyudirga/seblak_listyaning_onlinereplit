@@ -122,9 +122,9 @@ export default function OrderCard({ order, onUpdateStatus, isUpdating }: OrderCa
 
         {/* Status Update */}
         <div className="mt-6 pt-4 border-t">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <span className="font-medium">Ubah status:</span>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               {['confirmed', 'preparing', 'ready', 'delivered'].map((status) => (
                 <Button
                   key={status}
@@ -132,6 +132,7 @@ export default function OrderCard({ order, onUpdateStatus, isUpdating }: OrderCa
                   variant={order.status === status ? "default" : "outline"}
                   onClick={() => onUpdateStatus(status)}
                   disabled={isUpdating}
+                  className="min-w-[110px] px-3 py-2"
                 >
                   {getStatusText(status)}
                 </Button>

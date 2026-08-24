@@ -54,9 +54,11 @@ export default function MenuSection({ mode = "full" }: MenuSectionProps) {
     }
 
     const categoryFromUrl = new URLSearchParams(window.location.search).get("category");
-    const isKnownCategory = menuCategories.some((category) => category.id === categoryFromUrl);
+    const isKnownCategory = menuCategories.some(
+      (category) => category.id === categoryFromUrl?.toLowerCase()
+    );
 
-    return isKnownCategory && categoryFromUrl ? categoryFromUrl : "all";
+    return isKnownCategory && categoryFromUrl ? categoryFromUrl.toLowerCase() : "all";
   });
   const { addItem } = useCart();
 
@@ -67,7 +69,7 @@ export default function MenuSection({ mode = "full" }: MenuSectionProps) {
   const filteredItems =
     selectedCategory === "all"
       ? menuItems
-      : menuItems.filter((item) => item.category === selectedCategory);
+      : menuItems.filter((item) => item.category && item.category.toLowerCase() === selectedCategory.toLowerCase());
 
   const groupedMenuItems = useMemo(
     () =>
@@ -75,7 +77,7 @@ export default function MenuSection({ mode = "full" }: MenuSectionProps) {
         .filter((category) => category.id !== "all")
         .map((category) => ({
           ...category,
-          items: menuItems.filter((item) => item.category === category.id),
+          items: menuItems.filter((item) => item.category && item.category.toLowerCase() === category.id.toLowerCase()),
         }))
         .filter((category) => category.items.length > 0),
     [menuItems]
@@ -86,7 +88,7 @@ export default function MenuSection({ mode = "full" }: MenuSectionProps) {
       menuCategories
         .filter((category) => category.id !== "all")
         .map((category) => {
-          const items = menuItems.filter((item) => item.category === category.id);
+          const items = menuItems.filter((item) => item.category && item.category.toLowerCase() === category.id.toLowerCase());
 
           return {
             ...category,

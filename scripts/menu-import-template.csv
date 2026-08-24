@@ -1,0 +1,11 @@
+name,description,price,category,image,spicy_level,stock_quantity,low_stock_threshold,unit,is_available,rating,review_count
+Seblak Kerupuk Original,Seblak dengan kerupuk telur dan sayuran segar bumbu khas Listyaning,15000,seblak,https://images.unsplash.com/photo-1625869016774-3a92be2ae2cd?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300,Pedas,25,5,porsi,1,48,124
+Seblak Seafood Spesial,Seblak premium dengan udang cumi telur dan topping lengkap,25000,seblak,https://images.unsplash.com/photo-1563379926898-05f4575a45d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300,Spesial,15,3,porsi,1,49,89
+Seblak Telur Sayuran,Seblak dengan telur rebus sayuran segar cocok untuk yang tidak pedas,12000,seblak,https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300,Tidak Pedas,30,8,porsi,1,47,67
+Seblak Keju Mozarella,Seblak dengan keju mozarella meleleh perpaduan gurih dan pedas,20000,seblak,https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300,Keju,8,5,porsi,1,48,95
+Es Teh Manis,Teh manis dingin yang menyegarkan cocok menemani seblak pedas,5000,minuman,https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300,Dingin,50,15,gelas,1,46,45
+Ayam Goreng Crispy,Ayam goreng crispy dengan bumbu rahasia,18000,makanan,https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300,Gurih,12,5,porsi,1,47,78
+Kerupuk Mentah,Kerupuk mentah berkualitas untuk pelengkap atau cemilan,8000,cemilan,https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300,Cemilan,25,10,pack,1,45,32
+Krupuk,Krupuk aneka warna untuk topping seblak prasmanan,1000,prasmanan,https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300,Topping,100,20,pcs,1,45,15
+Lidah Sapi,Potongan lidah sapi empuk sebagai topping,3000,prasmanan,https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300,Topping,50,10,pcs,1,47,25
+Telor Ceplok,Telor mata sapi untuk melengkapi seblakmu,4000,prasmanan,https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300,Topping,80,15,pcs,1,48,40

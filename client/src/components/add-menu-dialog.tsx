@@ -170,7 +170,7 @@ export default function AddMenuDialog({ isOpen, onClose, onSubmit, isSubmitting 
                       <SelectItem value="cemilan">Cemilan</SelectItem>
                       {/* Add any unique categories from existing menu items that aren't in the predefined list */}
                       {uniqueCategories
-                        .filter(cat => !['seblak', 'prasmanan', 'makanan', 'minuman', 'cemilan'].includes(cat))
+                        .filter(cat => cat && !['seblak', 'prasmanan', 'makanan', 'minuman', 'cemilan'].includes(cat.toLowerCase()))
                         .map(category => (
                           <SelectItem key={category} value={category}>
                             {category.charAt(0).toUpperCase() + category.slice(1)}
