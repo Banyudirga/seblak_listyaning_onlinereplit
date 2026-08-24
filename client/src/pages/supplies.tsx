@@ -14,6 +14,7 @@ import { RecipesTab } from "@/components/supplies/recipes-tab";
 import { RecordPurchaseDialog } from "@/components/supplies/record-purchase-dialog";
 import { SuppliesTab } from "@/components/supplies/supplies-tab";
 import type { SupplyForm } from "@/components/supplies/supplies-types";
+import AdminAuthGuard from "@/components/admin-auth-guard";
 
 
 export default function SuppliesPage() {
@@ -58,17 +59,20 @@ export default function SuppliesPage() {
 
   if (isPageLoading) {
     return (
-      <div className="min-h-screen bg-light-grey flex items-center justify-center">
-        <div className="text-center">
-          <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4" />
-          <p>Memuat data barang...</p>
+      <AdminAuthGuard>
+        <div className="min-h-screen bg-light-grey flex items-center justify-center">
+          <div className="text-center">
+            <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4" />
+            <p>Memuat data barang...</p>
+          </div>
         </div>
-      </div>
+      </AdminAuthGuard>
     );
   }
 
   return (
-    <div className="min-h-screen bg-light-grey">
+    <AdminAuthGuard>
+      <div className="min-h-screen bg-light-grey">
       <SuppliesHeader
         onAddSupply={() => setIsAddSupplyOpen(true)}
         onRecordPurchase={() => setIsPurchaseOpen(true)}
@@ -169,6 +173,7 @@ export default function SuppliesPage() {
         recipes={recipes}
       />
     </div>
+    </AdminAuthGuard>
   );
 }
 

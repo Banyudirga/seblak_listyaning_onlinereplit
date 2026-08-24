@@ -81,11 +81,35 @@ export default function AdminLogin() {
 
       return res.json();
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       toast({
         title: "Berhasil masuk",
-        description: "Akses admin telah dibuka.",
+        description: "Memverifikasi sesi admin...",
       });
+
+      let isVerified = false;
+      const maxAttempts = 5;
+
+      for (let attempt = 0; attempt < maxAttempts; attempt++) {
+        try {
+          const sessionData = await fetchAdminSession();
+          if (sessionData.authenticated) {
+            isVerified = true;
+            break;
+          }
+        } catch {
+        }
+        await new Promise((resolve) => setTimeout(resolve, 300));
+      }
+
+      if (!isVerified) {
+        toast({
+          title: "Perhatian",
+          description: "Sesi belum terverifikasi, namun akan mencoba membuka dashboard.",
+          variant: "default",
+        });
+      }
+
       setLocation("/admin");
     },
     onError: (error: Error) => {

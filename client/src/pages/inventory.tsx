@@ -12,6 +12,7 @@ import { Link } from "wouter";
 import InventoryCard from "@/components/inventory-card";
 import EditStockDialog, { type UpdateStockForm } from "@/components/edit-stock-dialog";
 import AddMenuDialog, { type AddMenuForm } from "@/components/add-menu-dialog";
+import AdminAuthGuard from "@/components/admin-auth-guard";
 
 export default function Inventory() {
   const { toast } = useToast();
@@ -159,14 +160,17 @@ export default function Inventory() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-light-grey flex items-center justify-center">
-        <div className="text-center">Memuat inventaris...</div>
-      </div>
+      <AdminAuthGuard>
+        <div className="min-h-screen bg-light-grey flex items-center justify-center">
+          <div className="text-center">Memuat inventaris...</div>
+        </div>
+      </AdminAuthGuard>
     );
   }
 
   return (
-    <div className="min-h-screen bg-light-grey">
+    <AdminAuthGuard>
+      <div className="min-h-screen bg-light-grey">
       {/* Header */}
       <div className="bg-indonesian-red text-white">
         <div className="max-w-7xl mx-auto">
@@ -324,5 +328,6 @@ export default function Inventory() {
         isSubmitting={addMenuMutation.isPending}
       />
     </div>
+    </AdminAuthGuard>
   );
 }

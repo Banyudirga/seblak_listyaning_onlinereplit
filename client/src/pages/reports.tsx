@@ -3,10 +3,12 @@ import { Link } from "wouter";
 
 import { ReportsDashboard } from "@/components/supplies/reports/reports-dashboard";
 import { Button } from "@/components/ui/button";
+import AdminAuthGuard from "@/components/admin-auth-guard";
 
 export default function ReportsPage() {
   return (
-    <div className="min-h-screen bg-light-grey">
+    <AdminAuthGuard>
+      <div className="min-h-screen bg-light-grey">
       <div className="bg-indonesian-red text-white">
         <div className="mx-auto max-w-7xl">
           <div className="rounded-b-[28px] bg-indonesian-red px-4 py-5 sm:px-6 sm:py-6">
@@ -49,5 +51,6 @@ export default function ReportsPage() {
         <ReportsDashboard />
       </div>
     </div>
+    </AdminAuthGuard>
   );
 }

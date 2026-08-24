@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Link, useLocation } from "wouter";
 import type { Order } from "@shared/schema";
 import OrderCard from "@/components/order-card";
+import AdminAuthGuard from "@/components/admin-auth-guard";
 
 export default function Admin() {
   const { toast } = useToast();
@@ -116,17 +117,20 @@ export default function Admin() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-light-grey flex items-center justify-center">
-        <div className="text-center">
-          <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4" />
-          <p>Memuat pesanan...</p>
+      <AdminAuthGuard>
+        <div className="min-h-screen bg-light-grey flex items-center justify-center">
+          <div className="text-center">
+            <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4" />
+            <p>Memuat pesanan...</p>
+          </div>
         </div>
-      </div>
+      </AdminAuthGuard>
     );
   }
 
   return (
-    <div className="min-h-screen bg-light-grey">
+    <AdminAuthGuard>
+      <div className="min-h-screen bg-light-grey">
       {/* Header */}
       <div className="bg-indonesian-red text-white">
         <div className="max-w-7xl mx-auto">
@@ -284,5 +288,6 @@ export default function Admin() {
         </div>
       </div>
     </div>
+    </AdminAuthGuard>
   );
 }
