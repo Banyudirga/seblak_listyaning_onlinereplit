@@ -331,6 +331,52 @@ async updateOrderStatus(id: number, status: string): Promise<Order | undefined> 
     };
   }
 
+  async updateMenuItem(id: number, updates: Partial<InsertMenuItem> & { stockQuantity?: number; lowStockThreshold?: number; image?: string }): Promise<MenuItem | undefined> {
+    const dbUpdates: Record<string, any> = {};
+    if (updates.name !== undefined) dbUpdates.name = updates.name;
+    if (updates.description !== undefined) dbUpdates.description = updates.description;
+    if (updates.price !== undefined) dbUpdates.price = updates.price;
+    if (updates.category !== undefined) dbUpdates.category = updates.category;
+    if (updates.image !== undefined && updates.image !== "") dbUpdates.image = updates.image;
+    if (updates.spicyLevel !== undefined) dbUpdates.spicy_level = updates.spicyLevel;
+    if (updates.stockQuantity !== undefined) dbUpdates.stock_quantity = updates.stockQuantity;
+    if (updates.lowStockThreshold !== undefined) dbUpdates.low_stock_threshold = updates.lowStockThreshold;
+    if (updates.unit !== undefined) dbUpdates.unit = updates.unit;
+    if (updates.isAvailable !== undefined) dbUpdates.is_available = updates.isAvailable;
+
+    if (Object.keys(dbUpdates).length === 0) {
+      return undefined;
+    }
+
+    const { data, error } = await supabase
+      .from('menu_items')
+      .update(dbUpdates)
+      .eq('id', id)
+      .select('*')
+      .single();
+
+    if (error) {
+      console.error(`Error updating menu item ${id}:`, error);
+      return undefined;
+    }
+
+    return {
+      id: data.id,
+      name: data.name,
+      description: data.description,
+      price: data.price,
+      category: data.category,
+      image: data.image,
+      spicyLevel: data.spicy_level,
+      stockQuantity: data.stock_quantity,
+      lowStockThreshold: data.low_stock_threshold,
+      unit: data.unit,
+      isAvailable: data.is_available,
+      rating: data.rating,
+      reviewCount: data.review_count
+    };
+  }
+
   async updateMenuItemAvailability(id: number, isAvailable: number): Promise<MenuItem | undefined> {
     const { data, error } = await supabase
       .from('menu_items')

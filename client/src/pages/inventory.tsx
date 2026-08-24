@@ -25,18 +25,35 @@ export default function Inventory() {
 
   const updateStockMutation = useMutation({
     mutationFn: async ({ itemId, data }: { itemId: number; data: UpdateStockForm }) => {
+      // Process image: convert File to base64 string or use URL string
+      let imageUrl: string | undefined = undefined;
+      
+      if (data.image instanceof File) {
+        const reader = new FileReader();
+        imageUrl = await new Promise<string>((resolve) => {
+          reader.onload = () => resolve(reader.result as string);
+          reader.readAsDataURL(data.image as File);
+        });
+      } else if (typeof data.image === "string" && data.image.trim() !== "") {
+        imageUrl = data.image.trim();
+      }
+      
       return apiRequest(
         'PATCH',
         `/api/admin/inventory/${itemId}`,
-        data
+        {
+          stockQuantity: data.stockQuantity,
+          lowStockThreshold: data.lowStockThreshold,
+          ...(imageUrl !== undefined ? { image: imageUrl } : {}),
+        }
       );
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/inventory'] });
       queryClient.invalidateQueries({ queryKey: ['/api/menu'] });
       toast({
-        title: "Stok diperbarui",
-        description: "Stok menu berhasil diperbarui.",
+        title: "Menu diperbarui",
+        description: "Data menu berhasil diperbarui.",
       });
       setEditingItem(null);
     },

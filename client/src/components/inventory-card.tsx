@@ -61,7 +61,7 @@ export default function InventoryCard({ item, onEditStock, onToggleAvailability,
               onClick={() => onEditStock(item)}
             >
               <Edit className="h-4 w-4 mr-1" />
-              Ubah stok
+              Edit Menu
             </Button>
             
             <Button

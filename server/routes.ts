@@ -256,7 +256,7 @@ const adminUpdateOrderStatus = async (req: Request, res: Response) => {
 const updateMenuItemStock = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
-    const { stockQuantity, lowStockThreshold } = req.body;
+    const { stockQuantity, lowStockThreshold, image } = req.body;
 
     if (typeof stockQuantity !== 'number' || typeof lowStockThreshold !== 'number') {
       return res.status(400).json({ error: "Stock quantities must be numbers" });
@@ -266,14 +266,22 @@ const updateMenuItemStock = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Invalid stock values" });
     }
 
-    const item = await storage.updateMenuItemStock(id, stockQuantity, lowStockThreshold);
+    if (image !== undefined && typeof image !== "string") {
+      return res.status(400).json({ error: "Image must be a string URL" });
+    }
+
+    const item = await storage.updateMenuItem(id, {
+      stockQuantity,
+      lowStockThreshold,
+      ...(image !== undefined && image !== "" ? { image } : {}),
+    });
     if (!item) {
       return res.status(404).json({ error: "Menu item not found" });
     }
 
     res.json(item);
   } catch (error) {
-    console.error("Error updating stock:", error);
+    console.error("Error updating menu item:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 };

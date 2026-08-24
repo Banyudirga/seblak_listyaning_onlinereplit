@@ -14,6 +14,7 @@ export interface IStorage {
   getMenuItemsByCategory(category: string): Promise<MenuItem[]>;
   createMenuItem(menuItem: InsertMenuItem): Promise<MenuItem>;
   updateMenuItemStock(id: number, stockQuantity: number, lowStockThreshold: number): Promise<MenuItem | undefined>;
+  updateMenuItem(id: number, updates: Partial<InsertMenuItem> & { stockQuantity?: number; lowStockThreshold?: number; image?: string }): Promise<MenuItem | undefined>;
   updateMenuItemAvailability(id: number, isAvailable: number): Promise<MenuItem | undefined>;
   getAllSupplies(): Promise<Supply[]>;
   createSupply(supply: InsertSupply): Promise<Supply>;
@@ -282,6 +283,28 @@ export class MemStorage implements IStorage {
       return item;
     }
     return undefined;
+  }
+
+  async updateMenuItem(id: number, updates: Partial<InsertMenuItem> & { stockQuantity?: number; lowStockThreshold?: number; image?: string }): Promise<MenuItem | undefined> {
+    const item = this.menuItems.get(id);
+    if (!item) return undefined;
+
+    const updated: MenuItem = {
+      ...item,
+      ...(updates.name !== undefined && { name: updates.name }),
+      ...(updates.description !== undefined && { description: updates.description }),
+      ...(updates.price !== undefined && { price: updates.price }),
+      ...(updates.category !== undefined && { category: updates.category }),
+      ...(updates.image !== undefined && updates.image !== "" && { image: updates.image }),
+      ...(updates.spicyLevel !== undefined && { spicyLevel: updates.spicyLevel ?? null }),
+      ...(updates.stockQuantity !== undefined && { stockQuantity: updates.stockQuantity }),
+      ...(updates.lowStockThreshold !== undefined && { lowStockThreshold: updates.lowStockThreshold }),
+      ...(updates.unit !== undefined && { unit: updates.unit ?? "porsi" }),
+      ...(updates.isAvailable !== undefined && { isAvailable: updates.isAvailable }),
+    };
+
+    this.menuItems.set(id, updated);
+    return updated;
   }
 
   async updateMenuItemAvailability(id: number, isAvailable: number): Promise<MenuItem | undefined> {
