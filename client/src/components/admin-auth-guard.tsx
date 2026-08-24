@@ -7,6 +7,8 @@ type AdminSessionResponse = {
   authenticated?: boolean;
 };
 
+const LOGIN_PATH = "/admin/login";
+
 async function fetchAdminSession() {
   const res = await fetch(getApiUrl("/api/admin/session"), {
     credentials: "include",
@@ -36,7 +38,7 @@ export default function AdminAuthGuard({ children }: AdminAuthGuardProps) {
         if (!isMounted) return;
 
         if (!data.authenticated) {
-          setLocation("/admin/login");
+          setLocation(LOGIN_PATH);
           return;
         }
 
@@ -44,7 +46,7 @@ export default function AdminAuthGuard({ children }: AdminAuthGuardProps) {
       })
       .catch(() => {
         if (isMounted) {
-          setLocation("/admin/login");
+          setLocation(LOGIN_PATH);
         }
       });
 

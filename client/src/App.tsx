@@ -1,5 +1,5 @@
 import { useEffect, useState, type ComponentType } from "react";
-import { Switch, Route, useLocation } from "wouter";
+import { Switch, Route, Redirect, useLocation } from "wouter";
 import { queryClient, getApiUrl } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { RefreshCw } from "lucide-react";
@@ -14,6 +14,8 @@ import Supplies from "@/pages/supplies";
 import Reports from "@/pages/reports";
 import AdminLogin from "@/pages/admin-login";
 import NotFound from "@/pages/not-found";
+
+const LOGIN_PATH = "/admin/login";
 
 function ProtectedAdminRoute({ component: Component }: { component: ComponentType }) {
   const [, setLocation] = useLocation();
@@ -42,7 +44,7 @@ function ProtectedAdminRoute({ component: Component }: { component: ComponentTyp
 
   useEffect(() => {
     if (status === "denied") {
-      setLocation("/admin/login");
+      setLocation(LOGIN_PATH);
     }
   }, [setLocation, status]);
 
@@ -58,6 +60,7 @@ function ProtectedAdminRoute({ component: Component }: { component: ComponentTyp
   }
 
   if (status === "denied") {
+    // User will be redirected via effect above. Return null during transition.
     return null;
   }
 
@@ -75,6 +78,12 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/menu" component={MenuPage} />
       <Route path="/receipt" component={Receipt} />
+      <Route path="/login">
+        <Redirect to={LOGIN_PATH} />
+      </Route>
+      <Route path="/admin-login">
+        <Redirect to={LOGIN_PATH} />
+      </Route>
       <Route path="/admin/login" component={AdminLogin} />
       <Route path="/admin" component={ProtectedAdminPage} />
       <Route path="/inventory" component={ProtectedInventoryPage} />

@@ -8,10 +8,15 @@
     <meta name="keywords" content="seblak online, pesan seblak, seblak antar, seblak listyaning, makanan indonesia, seblak pedas">
     <meta name="author" content="Seblak Listyaning">
     <meta name="theme-color" content="#f43f5e">
-    <link rel="manifest" href="/manifest.json">
+    <!-- Disable ALL caching for this app so stale service workers / cached HTML don't break login -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+
+    <!-- Icons only (MANIFEST / SW FULLY DISABLED BELOW via script) -->
     <link rel="icon" href="/icons/icon-192x192.svg">
     <link rel="apple-touch-icon" href="/icons/icon-192x192.svg">
-    
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://seblak-listyaning.com/">
@@ -50,13 +55,89 @@
     </script>
 
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <!-- ============================================================
+         CRITICAL: KILL / UNREGISTER ANY EXISTING SERVICE WORKERS
+         BEFORE REACT OR ANY OTHER SCRIPT RUNS.
+         This prevents old SWs from serving stale cached HTML
+         (e.g. /admin/login being intercepted -> blank page / 405).
+         ============================================================ -->
+    <script>
+      (function () {
+        try {
+          // 1. Unregister every service worker we can find
+          if ("serviceWorker" in navigator) {
+            var killed = [];
+            navigator.serviceWorker
+              .getRegistrations()
+              .then(function (registrations) {
+                if (!registrations || registrations.length === 0) return;
+                return Promise.all(
+                  registrations.map(function (reg) {
+                    return reg.unregister().then(function (ok) {
+                      killed.push(ok);
+                    });
+                  })
+                );
+              })
+              .catch(function () {
+                /* ignore */
+              });
+
+            // Also tell any currently controlling SW to die immediately
+            try {
+              if (navigator.serviceWorker.controller) {
+                try {
+                  navigator.serviceWorker.controller.postMessage({ type: "SKIP_WAITING" });
+                } catch (e) {}
+              }
+            } catch (e) {}
+          }
+
+          // 2. Aggressively clear cache storage names used by previous SW
+          if ("caches" in window) {
+            caches
+              .keys()
+              .then(function (keys) {
+                return Promise.all(
+                  keys.map(function (key) {
+                    return caches.delete(key).catch(function () {});
+                  })
+                );
+              })
+              .catch(function () {
+                /* ignore */
+              });
+          }
+
+          // 3. If this page URL happens to be /admin or the root AND user is
+          //    supposed to go to /admin/login, we force it via a raw location
+          //    replace BEFORE React mounts, so even if the client router is
+          //    confused by cache, the user ALWAYS lands on the login page when
+          //    they click "Dashboard Admin".
+          var p = window.location.pathname;
+          var loginPath = "/admin/login";
+          // List of paths that should NEVER open a blank/protected screen
+          // without user being able to see login first - we simply bounce them
+          // to the login page unconditionally on fresh page load.
+          var protectedPathsOnHardNav = ["/admin"];
+          if (protectedPathsOnHardNav.indexOf(p) !== -1) {
+            try {
+              window.location.replace(loginPath);
+            } catch (e) {
+              window.location.href = loginPath;
+            }
+          }
+        } catch (e) {
+          /* swallow - worst case user still sees login via React below */
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <!-- Replit banner only -->
     <script type="text/javascript" src="https://replit.com/public/js/replit-dev-banner.js"></script>
-    
-    <!-- Service Worker Registration is handled in service-worker-registration.ts -->
   </body>
 </html>

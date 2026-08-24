@@ -22,7 +22,17 @@ const allowedOrigins = (process.env.CORS_ORIGIN || "")
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 
-if (process.env.NODE_ENV === 'production') {
+// Enable CORS ALWAYS (not just NODE_ENV=production). Railway often
+// has empty NODE_ENV and missing CORS would break all preflight OPTIONS,
+// causing browsers to surface HTTP 405 Method Not Allowed to the user.
+{
+  // Local development: allow any origin so mobile/tablet on LAN works.
+  // Production: strictly honor CORS_ORIGIN allow-list.
+  const isLocalEnv =
+    (process.env.NODE_ENV && process.env.NODE_ENV !== "production") ||
+    (process.env.RAILWAY_ENVIRONMENT && process.env.RAILWAY_ENVIRONMENT !== "production") ||
+    false;
+
   app.use((req, res, next) => {
     const origin = req.headers.origin;
 
@@ -33,14 +43,14 @@ if (process.env.NODE_ENV === 'production') {
       if (allowedOrigins.includes(origin)) {
         res.setHeader('Access-Control-Allow-Origin', origin);
       } else {
-        // Fallback: if no explicit CORS_ORIGIN set but request comes from browser,
-        // echo back origin (for dev/staging; production should set CORS_ORIGIN).
-        if (allowedOrigins.length === 0) {
+        // Fallback: if no explicit CORS_ORIGIN configured or local dev,
+        // echo back origin so CORS doesn't block during onboarding.
+        if (allowedOrigins.length === 0 || isLocalEnv) {
           res.setHeader('Access-Control-Allow-Origin', origin);
         }
       }
     } else if (allowedOrigins.length === 0) {
-      // No origin header and no explicit allow-list (local curl, health checks)
+      // No origin header (curl, health checks) - permissive when allow-list empty
       res.setHeader('Access-Control-Allow-Origin', '*');
     }
 
@@ -50,7 +60,6 @@ if (process.env.NODE_ENV === 'production') {
     res.setHeader('Access-Control-Expose-Headers', 'Set-Cookie');
 
     if (req.method === 'OPTIONS') {
-      // Set cookie-related headers for preflight as well
       res.setHeader('Access-Control-Max-Age', '86400');
       return res.status(204).end();
     }

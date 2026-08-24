@@ -1,98 +1,43 @@
-// Service Worker for Seblak Delivery PWA
-const CACHE_NAME = 'seblak-delivery-v2';
-const isLocalhost =
-  self.location.hostname === 'localhost' ||
-  self.location.hostname === '127.0.0.1';
-const urlsToCache = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/icons/icon-192x192.svg',
-  '/icons/icon-512x512.svg',
-  // Add other assets that should be available offline
-];
+// KILL SWITCH - Unregisters this service worker immediately.
+// Seblak Listyaning no longer uses a service worker because it caused
+// cross-origin login/cookie issues between Vercel (frontend) and
+// Railway (backend API).
 
-// Install event - cache assets
-self.addEventListener('install', (event) => {
-  if (isLocalhost) {
-    event.waitUntil(self.skipWaiting());
-    return;
-  }
+const CACHE_NAME = 'seblak-delivery-obliterate';
 
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => {
-        console.log('Opened cache');
-        return cache.addAll(urlsToCache);
-      })
-  );
+self.addEventListener('install', () => {
+  // Skip waiting so new users never get the old broken one
+  self.skipWaiting();
 });
 
-// Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
-  if (isLocalhost) {
-    event.waitUntil((async () => {
-      const cacheNames = await caches.keys();
-      await Promise.all(cacheNames.map((cacheName) => caches.delete(cacheName)));
-      await self.registration.unregister();
-    })());
-    return;
-  }
-
-  const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheWhitelist.indexOf(cacheName) === -1) {
-            return caches.delete(cacheName);
-          }
-        })
+    (async () => {
+      // 1. Delete all caches owned by this SW
+      const cacheNames = await caches.keys();
+      await Promise.all(
+        cacheNames.map((name) => caches.delete(name))
       );
-    })
+
+      // 2. Unregister this SW permanently
+      await self.registration.unregister();
+
+      // 3. Claim all clients then force them to reload cleanly
+      const clientsArr = await self.clients.matchAll({ type: 'window' });
+      for (const client of clientsArr) {
+        if (client && 'navigate' in client && client.url) {
+          try {
+            client.navigate(client.url);
+          } catch {
+            // Some browsers don't allow navigate in activate; ignore
+          }
+        }
+      }
+    })()
   );
 });
 
-// Fetch event - serve from cache or network
-self.addEventListener('fetch', (event) => {
-  const requestUrl = new URL(event.request.url);
-  const isDevAssetRequest =
-    requestUrl.origin !== self.location.origin ||
-    requestUrl.pathname.startsWith('/src/') ||
-    requestUrl.pathname.startsWith('/node_modules/') ||
-    requestUrl.pathname.includes('/@vite/') ||
-    requestUrl.searchParams.has('t') ||
-    event.request.method !== 'GET';
-
-  if (isLocalhost || isDevAssetRequest || event.request.url.includes('/api/')) {
-    event.respondWith(fetch(event.request));
-    return;
-  }
-
-  event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        if (response) {
-          return response;
-        }
-
-        const fetchRequest = event.request.clone();
-
-        return fetch(fetchRequest)
-          .then((response) => {
-            if (!response || response.status !== 200 || response.type !== 'basic') {
-              return response;
-            }
-
-            const responseToCache = response.clone();
-
-            caches.open(CACHE_NAME)
-              .then((cache) => {
-                cache.put(event.request, responseToCache);
-              });
-
-            return response;
-          });
-      })
-  );
+// Never intercept any fetch requests - pass through and fail fast
+self.addEventListener('fetch', () => {
+  // Intentionally empty: don't call respondWith so browser uses network directly.
 });

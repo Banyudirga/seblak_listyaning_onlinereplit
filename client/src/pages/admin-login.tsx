@@ -1,188 +1,257 @@
-import { type FormEvent, useEffect, useState } from "react";
-import { useMutation } from "@tanstack/react-query";
-import { Link, useLocation } from "wouter";
-import { LockKeyhole, RefreshCw } from "lucide-react";
-
+import { useEffect, useState } from "react";
+import { useLocation } from "wouter";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
+import { ArrowLeft, Loader2, LogIn } from "lucide-react";
 import { getApiUrl } from "@/lib/queryClient";
+import { toast } from "@/hooks/use-toast";
 
-type AdminSessionResponse = {
-  authenticated?: boolean;
-};
+const loginSchema = z.object({
+  password: z.string().min(1, "Password wajib diisi"),
+});
 
-async function fetchAdminSession() {
-  const res = await fetch(getApiUrl("/api/admin/session"), {
-    credentials: "include",
-  });
-
-  if (!res.ok) {
-    const text = (await res.text()) || res.statusText;
-    throw new Error(text);
-  }
-
-  return (await res.json()) as AdminSessionResponse;
-}
+type LoginValues = z.infer<typeof loginSchema>;
 
 export default function AdminLogin() {
-  const { toast } = useToast();
   const [, setLocation] = useLocation();
-  const [password, setPassword] = useState("");
-  const [isCheckingSession, setIsCheckingSession] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+
+  // When user clicks "Dashboard Admin" from footer, we always want them to SEE
+  // the login screen (even if they are already logged in from a previous
+  // session). Footer navigates here with ?force=1.
+  const params = new URLSearchParams(window.location.search);
+  const forcePrompt = params.get("force") === "1" || params.get("force") === "true";
+
+  const form = useForm<LoginValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { password: "" },
+  });
+
+  const [pageState, setPageState] = useState<
+    "initializing" | "show-login" | "auto-redirecting"
+  >("initializing");
 
   useEffect(() => {
-    let isMounted = true;
+    let cancelled = false;
 
-    fetchAdminSession()
-      .then((data) => {
-        if (!isMounted) return;
-
-        if (data.authenticated) {
-          setLocation("/admin");
+    async function checkAndDecide() {
+      try {
+        // === ?force=1 branch: ALWAYS show login, clear current session ===
+        if (forcePrompt) {
+          try {
+            await fetch(getApiUrl("/api/admin/logout"), {
+              method: "POST",
+              credentials: "include",
+            });
+          } catch {
+            /* ignore */
+          }
+          if (!cancelled) {
+            setPageState("show-login");
+          }
           return;
         }
 
-        setIsCheckingSession(false);
-      })
-      .catch(() => {
-        if (isMounted) {
-          setIsCheckingSession(false);
+        // === No ?force=1: skip to dashboard if session exists ===
+        const res = await fetch(getApiUrl("/api/admin/session"), {
+          credentials: "include",
+        });
+        const data = (await res.json()) as { authenticated?: boolean };
+
+        if (!cancelled && data.authenticated) {
+          setPageState("auto-redirecting");
+          setTimeout(() => {
+            setLocation("/admin");
+          }, 0);
+        } else if (!cancelled) {
+          setPageState("show-login");
         }
-      });
+      } catch {
+        if (!cancelled) {
+          setPageState("show-login");
+        }
+      }
+    }
+
+    checkAndDecide();
 
     return () => {
-      isMounted = false;
+      cancelled = true;
     };
-  }, [setLocation]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [forcePrompt]);
 
-  const loginMutation = useMutation({
-    mutationFn: async (adminPassword: string) => {
+  async function onSubmit(values: LoginValues) {
+    setIsLoggingIn(true);
+    try {
       const res = await fetch(getApiUrl("/api/admin/login"), {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ password: adminPassword }),
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
+        body: JSON.stringify({ password: values.password }),
       });
 
-      if (!res.ok) {
-        const text = (await res.text()) || res.statusText;
-        throw new Error(text);
+      const data = (await res.json()) as {
+        success?: boolean;
+        message?: string;
+        error?: string;
+      };
+
+      if (!res.ok || !data.success) {
+        toast({
+          title: "Login gagal",
+          description: data.message || data.error || "Password admin tidak valid.",
+          variant: "destructive",
+        });
+        setIsLoggingIn(false);
+        return;
       }
 
-      return res.json();
-    },
-    onSuccess: async () => {
       toast({
         title: "Berhasil masuk",
         description: "Memverifikasi sesi admin...",
       });
 
-      let isVerified = false;
-      const maxAttempts = 5;
-
-      for (let attempt = 0; attempt < maxAttempts; attempt++) {
-        try {
-          const sessionData = await fetchAdminSession();
-          if (sessionData.authenticated) {
-            isVerified = true;
-            break;
-          }
-        } catch {
+      // Confirm the session is actually set, then go to dashboard.
+      // Retry a couple times so cross-domain cookies take effect in production.
+      let verified = false;
+      for (let i = 0; i < 5; i++) {
+        const sess = await fetch(getApiUrl("/api/admin/session"), {
+          credentials: "include",
+        });
+        const sessData = (await sess.json()) as { authenticated?: boolean };
+        if (sessData.authenticated) {
+          verified = true;
+          break;
         }
         await new Promise((resolve) => setTimeout(resolve, 300));
       }
 
-      if (!isVerified) {
+      if (!verified) {
         toast({
-          title: "Perhatian",
-          description: "Sesi belum terverifikasi, namun akan mencoba membuka dashboard.",
-          variant: "default",
+          title: "Sesi belum terdeteksi",
+          description: "Silakan refresh halaman / login ulang.",
+          variant: "destructive",
         });
+        setIsLoggingIn(false);
+        return;
       }
 
       setLocation("/admin");
-    },
-    onError: (error: Error) => {
+    } catch (err) {
       toast({
         title: "Login gagal",
-        description: error.message || "Password admin tidak valid.",
+        description: "Terjadi kesalahan jaringan, coba lagi.",
         variant: "destructive",
       });
-    },
-  });
+    } finally {
+      setIsLoggingIn(false);
+    }
+  }
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    loginMutation.mutate(password);
-  };
-
-  if (isCheckingSession) {
+  if (pageState === "initializing") {
     return (
-      <div className="min-h-screen bg-light-grey flex items-center justify-center">
+      <div className="min-h-screen bg-light-grey flex items-center justify-center p-4">
+        <Loader2 className="h-8 w-8 animate-spin text-indonesian-red" />
+      </div>
+    );
+  }
+
+  if (pageState === "auto-redirecting") {
+    return (
+      <div className="min-h-screen bg-light-grey flex items-center justify-center p-4">
         <div className="text-center">
-          <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4" />
-          <p>Memeriksa sesi admin...</p>
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-indonesian-red" />
+          <p>Masuk ke dashboard admin...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-light-grey flex items-center justify-center px-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-3">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-indonesian-red/10">
-            <LockKeyhole className="h-6 w-6 text-indonesian-red" />
-          </div>
-          <CardTitle className="text-center text-2xl">Login Admin</CardTitle>
-          <CardDescription className="text-center">
-            Masukkan password admin untuk membuka dashboard pengelolaan.
-          </CardDescription>
-        </CardHeader>
+    <div className="min-h-screen bg-light-grey flex flex-col items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <button
+          type="button"
+          onClick={() => setLocation("/")}
+          className="mb-4 flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900 transition-colors"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Kembali ke Beranda
+        </button>
 
-        <CardContent>
-          <form className="space-y-4" onSubmit={handleSubmit}>
-            <div className="space-y-2">
-              <label htmlFor="admin-password" className="text-sm font-medium">
-                Password Admin
-              </label>
-              <Input
-                id="admin-password"
-                type="password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                placeholder="Masukkan password admin"
-                autoComplete="current-password"
-                disabled={loginMutation.isPending}
-              />
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="text-center mb-6">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-red-100 mb-3">
+              <LogIn className="h-7 w-7 text-indonesian-red" />
             </div>
+            <h1 className="text-xl font-bold mb-1">Login Admin</h1>
+            <p className="text-sm text-gray-600">
+              {forcePrompt
+                ? "Masukkan password admin untuk masuk ke dashboard."
+                : "Masukkan password admin untuk mengakses panel manajemen."}
+            </p>
+          </div>
 
-            <Button
-              type="submit"
-              className="w-full bg-indonesian-red hover:bg-red-700"
-              disabled={loginMutation.isPending || !password.trim()}
-            >
-              {loginMutation.isPending ? "Memproses..." : "Masuk"}
-            </Button>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Password Admin</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Input
+                          type={showPassword ? "text" : "password"}
+                          placeholder="Masukkan password admin..."
+                          autoComplete="off"
+                          autoFocus
+                          {...field}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword((s) => !s)}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-500 hover:text-gray-800 px-2 py-1 rounded"
+                        >
+                          {showPassword ? "Sembunyikan" : "Lihat"}
+                        </button>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <Link href="/" className="block">
-              <Button type="button" variant="outline" className="w-full">
-                Kembali ke Beranda
+              <Button
+                type="submit"
+                className="w-full bg-indonesian-red hover:bg-red-700 text-white"
+                disabled={isLoggingIn}
+              >
+                {isLoggingIn ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <LogIn className="h-4 w-4 mr-2" />
+                )}
+                Masuk
               </Button>
-            </Link>
-          </form>
-        </CardContent>
-      </Card>
+            </form>
+          </Form>
+        </div>
+      </div>
     </div>
   );
 }
